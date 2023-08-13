@@ -3,10 +3,10 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
-        applicationId "com.kagg886.xposeddemo"
+        applicationId "com.kagg886.fuck_arc_b30"
         minSdk 28
         targetSdk 32
         versionCode 1
@@ -29,9 +29,11 @@ android {
 
 dependencies {
     compileOnly (fileTree(dir: "libs", include: ["*.jar"]))
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation 'com.koushikdutta.async:androidasync:2.2.1'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.37'
 }

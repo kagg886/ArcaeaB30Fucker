@@ -1,5 +1,7 @@
-package com.kagg886.xposeddemo;
+package com.kagg886.fuck;
 
+import com.alibaba.fastjson2.JSON;
+import com.kagg886.fuck_arc_b30.server.model.Result;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -12,6 +14,6 @@ import static org.junit.Assert.*;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
-        assertEquals(4, 2 + 2);
+        System.out.println(JSON.toJSONString(Result.OK("111")));
     }
 }

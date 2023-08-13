@@ -1,4 +1,4 @@
-package com.kagg886.xposeddemo;
+package com.kagg886.fuck;
 
 import android.content.Context;
 import androidx.test.platform.app.InstrumentationRegistry;

@@ -1,0 +1,44 @@
+package com.kagg886.fuck_arc_b30;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.os.Bundle;
+import android.util.Log;
+import com.kagg886.fuck_arc_b30.server.HttpServer;
+import com.kagg886.fuck_arc_b30.server.servlet.impl.GetSongInfoById;
+import com.kagg886.fuck_arc_b30.server.servlet.impl.Version;
+import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.callbacks.XC_LoadPackage;
+
+import java.lang.reflect.Method;
+
+public class Hooker implements IXposedHookLoadPackage {
+    @SuppressLint("StaticFieldLeak")
+    public static Activity activity;
+
+    @Override
+    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
+        if (loadPackageParam.packageName.equals("moe.low.arc")) {
+            Utils.runAsync(() -> Log.i(Hooker.class.getName(), "Your Local IP is:" + Utils.getLocalIp()));
+
+            //attach Context
+            Class<?> AppActivityClass = loadPackageParam.classLoader.loadClass("low.moe.AppActivity");
+            Method onCreate = AppActivityClass.getDeclaredMethod("onCreate", Bundle.class);
+            XposedBridge.hookMethod(onCreate, new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    activity = ((Activity) param.thisObject);
+                    Log.i(Hooker.class.getName(), "App Activity is Find!");
+
+                    //start HTTPServer
+                    HttpServer.getInstance().addRoute(new Version());
+                    HttpServer.getInstance().addRoute(new GetSongInfoById());
+                    HttpServer.getInstance().startServer(61616);
+                }
+            });
+
+        }
+    }
+}

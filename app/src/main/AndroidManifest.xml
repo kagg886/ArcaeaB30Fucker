@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
-          package="com.kagg886.xposeddemo">
+          package="com.kagg886.fuck_arc_b30">
 
     <application
             android:allowBackup="true"
@@ -12,6 +12,30 @@
             android:icon="@mipmap/ic_launcher"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
-            android:theme="@style/Theme.XposedDemo"/>
+            android:theme="@style/Theme.XposedDemo">
+
+            <activity android:name=".MainActivity" android:exported="true">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN"/>
+                    <category android:name="android.intent.category.LAUNCHER"/>
+                </intent-filter>
+            </activity>
+
+
+        <meta-data
+                android:name="xposedscope"
+                android:resource="@array/xposed_scope" />
+        <meta-data
+                android:name="xposedmodule"
+                android:value="true" />
+        <meta-data
+                android:name="xposeddescription"
+                android:value="616 b30以及资源的后端服务器" />
+        <meta-data
+                android:name="xposedminversion"
+                android:value="82" />
+    </application>
+
+
 
 </manifest>
