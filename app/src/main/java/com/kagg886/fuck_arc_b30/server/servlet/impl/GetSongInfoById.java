@@ -26,7 +26,7 @@ public class GetSongInfoById extends AbstractServlet {
 
 
     public GetSongInfoById() {
-        super("getSongInfoById", Method.POST);
+        super("res/getSongInfoById", Method.POST);
     }
 
     //保证纯净性，此处使用原始数据，详细定数由GetPlayData获取

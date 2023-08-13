@@ -43,6 +43,7 @@
 
    1. 若下文未特别注明，则正常code一律为`200`，正常msg一律为`success`
    1. 如无特殊说明，下文中提到的所有`id`为一个全小写无空格的字符串
+   1. 必选参数使用`*`注释
 
 3. 公共响应码：
 
@@ -82,13 +83,13 @@
 
      **URL**
 
-     POST /getSongInfoById
+     POST /res/getSongInfoById
 
      **query参数**
 
      | Key  | Description                |
      | ---- | -------------------------- |
-     | id   | 一个字符串，代表要查询的id |
+     | *id  | 一个字符串，代表要查询的id |
 
      **返回参数**
 
@@ -183,13 +184,13 @@
    
      **URL**
    
-     POST /getPlayerDataById
+     POST /data/getPlayerDataById
    
      **query参数**
    
      | Key  | Description                |
      | ---- | -------------------------- |
-     | id   | 一个字符串，代表要查询的id |
+     | *id  | 一个字符串，代表要查询的id |
    
      **返回参数**
    
@@ -283,7 +284,7 @@
    
      **URL**
    
-     GET /refreshResource
+     GET /res/refreshResource
    
      **返回示例**
    
@@ -291,4 +292,24 @@
      {"code":200,"msg":"success"}
      ```
    
-     
+   - 获取图片
+   
+     **描述**
+   
+     根据id等信息获得曲绘
+   
+     **URL**
+   
+     GET /res/image
+   
+     **query参数**
+   
+     | Key        | Description                                  |
+     | ---------- | -------------------------------------------- |
+     | *id        | 一个字符串，代表要查询的id                   |
+     | difficulty | 难度，可以填写难度和难度代号，默认为future。 |
+     | size       | 大小，可填写256和512，默认为256              |
+   
+     **返回示例**
+   
+     对应的曲绘，略

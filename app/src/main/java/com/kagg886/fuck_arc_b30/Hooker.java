@@ -7,10 +7,7 @@ import android.util.Log;
 import android.widget.Toast;
 import com.kagg886.fuck_arc_b30.res.SongManager;
 import com.kagg886.fuck_arc_b30.server.HttpServer;
-import com.kagg886.fuck_arc_b30.server.servlet.impl.GetPlayerDataById;
-import com.kagg886.fuck_arc_b30.server.servlet.impl.GetSongInfoById;
-import com.kagg886.fuck_arc_b30.server.servlet.impl.RefreshResource;
-import com.kagg886.fuck_arc_b30.server.servlet.impl.Version;
+import com.kagg886.fuck_arc_b30.server.servlet.impl.*;
 import com.kagg886.fuck_arc_b30.util.Utils;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -45,7 +42,7 @@ public class Hooker implements IXposedHookLoadPackage {
                     HttpServer.getInstance().addRoute(new Version());
                     HttpServer.getInstance().addRoute(new GetSongInfoById());
                     HttpServer.getInstance().addRoute(new GetPlayerDataById());
-
+                    HttpServer.getInstance().addRoute(new Image());
 
                     HttpServer.getInstance().startServer(61616);
 

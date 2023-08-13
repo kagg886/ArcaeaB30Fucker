@@ -23,7 +23,7 @@ import static com.kagg886.fuck_arc_b30.res.SongManager.scoreData;
 public class GetPlayerDataById extends AbstractServlet {
 
     public GetPlayerDataById() {
-        super("getPlayerDataById", Method.POST);
+        super("data/getPlayerDataById", Method.POST);
     }
 
     @Override
@@ -33,8 +33,7 @@ public class GetPlayerDataById extends AbstractServlet {
             response.send(JSON.toJSONString(Result.ERR_MUST_INPUT_ID));
         }
 
-        List<SingleSongData> data = scoreData.stream().filter(songs -> songs.getId().equals(id)).collect(Collectors.toList());
-
+        List<SingleSongData> data = SongManager.findDataById(id);
         if (data.size() != 0) {
             response.send(JSON.toJSONString(Result.OK(data)));
             return;

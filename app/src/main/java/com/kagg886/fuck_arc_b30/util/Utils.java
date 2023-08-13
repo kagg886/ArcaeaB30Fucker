@@ -12,6 +12,9 @@ import java.net.UnknownHostException;
  **/
 public class Utils {
 
+    public static String[] newStringArray(String... arr) {
+        return arr;
+    }
     public static void runAsync(Runnable r) {
         new Thread(r).start();
     }

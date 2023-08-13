@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 歌曲统一管理类
@@ -34,6 +35,10 @@ public class SongManager {
                 .map(v -> (JSONObject) v)
                 .filter(songs -> songs.getString("id").equals(id)).findFirst();
         return object.orElse(null);
+    }
+
+    public static List<SingleSongData> findDataById(String id) {
+        return scoreData.stream().filter(songs -> songs.getId().equals(id)).collect(Collectors.toList());
     }
 
 
@@ -80,7 +85,7 @@ public class SongManager {
                 //modifier ---> 10
                 //health ---> 11
                 //ct ---> 12
-
+                scoreData.clear();
                 String id;
                 do {
                     id = cursor.getString(8);

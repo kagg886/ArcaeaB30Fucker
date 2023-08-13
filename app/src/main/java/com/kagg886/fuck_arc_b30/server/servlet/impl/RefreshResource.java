@@ -15,7 +15,7 @@ import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
  **/
 public class RefreshResource extends AbstractServlet {
     public RefreshResource() {
-        super("refreshResource",Method.GET);
+        super("res/refreshResource",Method.GET);
     }
 
     @Override

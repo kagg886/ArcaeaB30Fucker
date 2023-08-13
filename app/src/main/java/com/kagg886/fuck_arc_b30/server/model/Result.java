@@ -1,5 +1,7 @@
 package com.kagg886.fuck_arc_b30.server.model;
 
+import java.util.Arrays;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -14,6 +16,7 @@ public class Result<T> {
     public static final Function<String,Result<String>> ERR_ID_NOT_EXISTS = (id) -> Result.err(1002,"id: " + id + " not find");
 
     public static final Function<String,Result<String>> ERR_NOT_PLAYED = (id) -> Result.err(1003,"id: " + id + " not played");
+    public static final BiFunction<String,String[],Result<String>> PARAM_IS_ILLEGAL = (a, b) -> Result.err(1004,String.format("param: %s is illegal, correct input is: %s",a, Arrays.toString(b)));
 
 
     private final int code;
