@@ -14,8 +14,8 @@ import com.koushikdutta.async.http.server.HttpServerRequestCallback;
  * @date 2023/8/13 11:47
  **/
 public abstract class AbstractServlet implements HttpServerRequestCallback {
-    private String path;
-    private Method method;
+    private final String path;
+    private final Method method;
 
     //path不需要加 '/'
     public AbstractServlet(String path, Method method) {
@@ -37,7 +37,7 @@ public abstract class AbstractServlet implements HttpServerRequestCallback {
 
     @Override
     public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
-        Log.d(getClass().getName(),String.format("Route accessed: %s",request.getPath()));
+        Log.i(getClass().getName(),String.format("Route accessed: %s",request.getPath()));
         try {
             onRequest0(request,response);
         } catch (Throwable e) {

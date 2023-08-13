@@ -38,12 +38,10 @@ public class HttpServer {
      * 开启本地服务
      */
     public void startServer(int port) {
-        //如果有其他的请求方式，例如下面一行代码的写法
         try {
             server.listen(port);
             Log.i(HttpServer.class.getName(),"Arcaea server started on port:" + port);
         } catch (Exception e) {
-
         }
     }
 }

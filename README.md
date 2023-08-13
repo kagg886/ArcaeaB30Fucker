@@ -7,7 +7,7 @@
 - [x] 歌曲信息查询
 - [ ] Best30查询
 - [ ] 曲绘查询
-- [ ] 单曲成绩查询
+- [x] 单曲成绩查询
 
 > 您可以通过Issue来增加要写的功能
 >
@@ -42,6 +42,7 @@
 2. 注意事项：
 
    1. 若下文未特别注明，则正常code一律为`200`，正常msg一律为`success`
+   1. 如无特殊说明，下文中提到的所有`id`为一个全小写无空格的字符串
 
 3. 公共响应码：
 
@@ -49,6 +50,9 @@
    | ---- | -------------------- |
    | 200  | 接口返回正常         |
    | -1   | 接口内部错误接口说明 |
+   | 1001 | 未输入id             |
+   | 1002 | id不正确             |
+   | 1003 | 未游玩此id代表的谱面 |
 
 4. 接口说明：
 
@@ -70,11 +74,11 @@
      | data.versionCode | 版本代码    |
      | data.versionName | 版本号      |
 
-   - 根据id获取歌曲
+   - 根据id获取歌曲详情
 
      **描述**
 
-     根据id获取**唯一**的歌曲，其中id一般为小写字母不带空格。
+     根据id获取**唯一**的歌曲详情，其中id一般为小写字母不带空格。
 
      **URL**
 
@@ -171,4 +175,120 @@
      }
      ```
 
+   - 根据id获取游玩成绩
+   
+     **描述**
+   
+     根据id获取游玩成绩，其中id一般为小写字母不带空格。
+   
+     **URL**
+   
+     POST /getPlayerDataById
+   
+     **query参数**
+   
+     | Key  | Description                |
+     | ---- | -------------------------- |
+     | id   | 一个字符串，代表要查询的id |
+   
+     **返回参数**
+   
+     > 注: 精确到小数点的定数在服务器，本地没有，等待改进
+   
+     | Key                    | Description                                    |
+     | ---------------------- | ---------------------------------------------- |
+     | data                   | 本次查询到的歌曲数据，为一个列表。             |
+     | data.clearStatus       | 通关代码，详情见下方引用                       |
+     | date.difficulty        | 难度                                           |
+     | date.farCount          | 爆far数量                                      |
+     | date.health            | 歌曲结束时的回忆率，其中困难模式tl的回忆率为-1 |
+     | date.id                | 歌曲的id                                       |
+     | date.lostCount         | 爆lost数量                                     |
+     | date.perfectCount      | P数量                                          |
+     | date.score             | 分数                                           |
+     | date.shinyPerfectCount | 大P数量                                        |
+   
+     > ### 关于通关代码
+     >
+     > | Code | Description   |
+     > | ---- | ------------- |
+     > | 0    | Track Lost    |
+     > | 1    | 普通搭档Clear |
+     > | 2    | Full Recall   |
+     > | 3    | Pure Memory   |
+     > | 4    | 简单搭档Clear |
+     > | 5    | 困难搭档Clear |
+   
+     **返回示例**
+   
+     ```json
+     {
+         "code": 200,
+         "data": [
+             {
+                 "clearStatus": 2,
+                 "difficulty": "PAST",
+                 "farCount": 3,
+                 "health": 100,
+                 "id": "fairytale",
+                 "lostCount": 0,
+                 "perfectCount": 333,
+                 "score": 9955677,
+                 "shinyPerfectCount": 320
+             },
+             {
+                 "clearStatus": 2,
+                 "difficulty": "PRESENT",
+                 "farCount": 10,
+                 "health": 100,
+                 "id": "fairytale",
+                 "lostCount": 4,
+                 "perfectCount": 497,
+                 "score": 9824333,
+                 "shinyPerfectCount": 459
+             },
+             {
+                 "clearStatus": 2,
+                 "difficulty": "FUTURE",
+                 "farCount": 7,
+                 "health": 100,
+                 "id": "fairytale",
+                 "lostCount": 0,
+                 "perfectCount": 775,
+                 "score": 9955932,
+                 "shinyPerfectCount": 690
+             },
+             {
+                 "clearStatus": 2,
+                 "difficulty": "BEYOND",
+                 "farCount": 18,
+                 "health": 100,
+                 "id": "fairytale",
+                 "lostCount": 0,
+                 "perfectCount": 914,
+                 "score": 9904241,
+                 "shinyPerfectCount": 808
+             }
+         ],
+         "msg": "success"
+     }
+     
+     ```
+   
+   - 刷新资源
+   
+     **描述**
+   
+     刷新缓存的歌曲资源
+   
+     **URL**
+   
+     GET /refreshResource
+   
+     **返回示例**
+   
+     ```json
+     {"code":200,"msg":"success"}
+     ```
+   
      

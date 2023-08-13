@@ -4,9 +4,14 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
+import com.kagg886.fuck_arc_b30.res.SongManager;
 import com.kagg886.fuck_arc_b30.server.HttpServer;
+import com.kagg886.fuck_arc_b30.server.servlet.impl.GetPlayerDataById;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.GetSongInfoById;
+import com.kagg886.fuck_arc_b30.server.servlet.impl.RefreshResource;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.Version;
+import com.kagg886.fuck_arc_b30.util.Utils;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
@@ -32,10 +37,19 @@ public class Hooker implements IXposedHookLoadPackage {
                     activity = ((Activity) param.thisObject);
                     Log.i(Hooker.class.getName(), "App Activity is Find!");
 
+                    //init Resources
+                    SongManager.init();
+
                     //start HTTPServer
+                    HttpServer.getInstance().addRoute(new RefreshResource());
                     HttpServer.getInstance().addRoute(new Version());
                     HttpServer.getInstance().addRoute(new GetSongInfoById());
+                    HttpServer.getInstance().addRoute(new GetPlayerDataById());
+
+
                     HttpServer.getInstance().startServer(61616);
+
+                    activity.runOnUiThread(() -> Toast.makeText(activity, "Arcaea B30 Server Started!", Toast.LENGTH_SHORT).show());
                 }
             });
 

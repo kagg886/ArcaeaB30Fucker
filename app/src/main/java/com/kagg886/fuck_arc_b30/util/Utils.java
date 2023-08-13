@@ -1,4 +1,4 @@
-package com.kagg886.fuck_arc_b30;
+package com.kagg886.fuck_arc_b30.util;
 
 import java.io.IOException;
 import java.net.Socket;
