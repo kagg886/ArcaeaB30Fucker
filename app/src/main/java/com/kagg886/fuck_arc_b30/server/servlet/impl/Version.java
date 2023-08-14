@@ -1,6 +1,5 @@
 package com.kagg886.fuck_arc_b30.server.servlet.impl;
 
-import android.util.Log;
 import com.alibaba.fastjson2.JSON;
 import com.kagg886.fuck_arc_b30.BuildConfig;
 import com.kagg886.fuck_arc_b30.server.model.Result;
@@ -13,23 +12,24 @@ import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
  * @date 2023/8/13 11:52
  **/
 public class Version extends AbstractServlet {
+    public static final Version INSTANCE = new Version();
 
-    public Version() {
+    private Version() {
         super("version", Method.GET);
     }
 
     @Override
     public void onRequest0(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
-        response.send(JSON.toJSONString(Result.OK(Info.INSTANCE)));
+        response.send(JSON.toJSONString(Result.OK(AppVersionInfo.INSTANCE)));
     }
 
-    private static class Info {
-        public static Info INSTANCE = new Info();
+    public static class AppVersionInfo {
+        public static AppVersionInfo INSTANCE = new AppVersionInfo();
 
         private final String versionName;
         private final long versionCode;
 
-        public Info() {
+        public AppVersionInfo() {
             versionName = BuildConfig.VERSION_NAME;
             versionCode = BuildConfig.VERSION_CODE;
         }

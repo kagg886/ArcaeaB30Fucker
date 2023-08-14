@@ -23,7 +23,10 @@ import java.util.List;
  * @date 2023/8/14 9:13
  **/
 public class Best30 extends AbstractServlet {
-    public Best30() {
+
+    public static final Best30 INSTANCE = new Best30();
+
+    private Best30() {
         super("data/b30", Method.POST);
     }
 

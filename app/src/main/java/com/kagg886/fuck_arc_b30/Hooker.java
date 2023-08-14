@@ -39,12 +39,13 @@ public class Hooker implements IXposedHookLoadPackage {
                     SongManager.init();
 
                     //start HTTPServer
-                    HttpServer.getInstance().addRoute(new RefreshResource());
-                    HttpServer.getInstance().addRoute(new Version());
-                    HttpServer.getInstance().addRoute(new GetSongInfoById());
-                    HttpServer.getInstance().addRoute(new GetPlayerDataById());
-                    HttpServer.getInstance().addRoute(new Image());
-                    HttpServer.getInstance().addRoute(new Best30());
+                    HttpServer.getInstance().addRoute(RefreshResource.INSTANCE);
+                    HttpServer.getInstance().addRoute(Version.INSTANCE);
+                    HttpServer.getInstance().addRoute(GetSongInfoById.INSTANCE);
+                    HttpServer.getInstance().addRoute(GetPlayerDataById.INSTANCE);
+                    HttpServer.getInstance().addRoute(Image.INSTANCE);
+                    HttpServer.getInstance().addRoute(Best30.INSTANCE);
+                    HttpServer.getInstance().addRoute(AssetsGet.INSTANCE);
 
                     HttpServer.getInstance().startServer(61616);
 

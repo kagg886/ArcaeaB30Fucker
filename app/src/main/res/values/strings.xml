@@ -1,3 +1,16 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">ArcaeaB30Fucker</string>
+    <string name="title_activity_main">Arcaea B30 Fucker</string>
+    <string name="title_summary">概述</string>
+    <string name="title_b30">Best30</string>
+    <string name="title_query">歌曲信息</string>
+    <string name="loading">🤔</string>
+    <string name="loading_text" tools:ignore="TypographyEllipsis">Loading...</string>
+    <string name="loading_failed">😭</string>
+    <string name="loading_text_failed">Failed</string>
+    <string name="loading_success">🥰</string>
+    <string name="loading_text_success">Success</string>
+    <string name="ptt_max">13.06</string>
+    <string name="best30_status">Best30 Status</string>
+    <string name="cyaegha">Cyaegha</string>
 </resources>

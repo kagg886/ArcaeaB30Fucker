@@ -1,5 +1,15 @@
 package com.kagg886.fuck_arc_b30.util;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import com.kagg886.fuck_arc_b30.server.model.Result;
+import com.kagg886.fuck_arc_b30.server.servlet.AbstractServlet;
+import com.kagg886.fuck_arc_b30.server.servlet.impl.AssetsGet;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -17,7 +27,36 @@ import java.util.zip.ZipOutputStream;
 @SuppressWarnings("all")
 public class IOUtil {
 
+    public static final String base = "http://localhost:61616";
     private static final FileFilter emptyFilter = pathname -> true;
+
+    public static <T> T fetch(AbstractServlet url, Class<T> resultClass) throws IOException {
+        Connection.Method method = switch (url.getMethod()) {
+            case GET -> Connection.Method.GET;
+            case POST -> Connection.Method.POST;
+        };
+        String body = Jsoup.connect(base + url.getPath())
+                .ignoreContentType(true)
+                .method(method)
+                .timeout(5000)
+                .execute()
+                .body();
+        JSONObject json = JSON.parseObject(body);
+        if (json.getIntValue("code") != Result.OK().getCode()) {
+            throw new IOException(json.getString("msg"));
+        }
+        return JSON.parseObject(json.getJSONObject("data").toString(), resultClass);
+    }
+
+    public static Bitmap loadArcaeaResource(String path) throws IOException {
+        Connection.Response response = Jsoup.connect(base + AssetsGet.INSTANCE.getPath())
+                .ignoreContentType(true)
+                .method(AssetsGet.INSTANCE.getMethod() == AbstractServlet.Method.POST ? Connection.Method.POST : Connection.Method.GET)
+                .timeout(5000)
+                .data("path", path)
+                .execute();
+        return BitmapFactory.decodeStream(response.bodyStream());
+    }
 
     public static void zipFile(File src, File dst) throws IOException {
         if (!dst.exists()) {
@@ -56,7 +95,7 @@ public class IOUtil {
      * 删除文件
      * */
     public static void delFile(File f) {
-        delFile(f,emptyFilter);
+        delFile(f, emptyFilter);
     }
 
     /*
@@ -66,7 +105,7 @@ public class IOUtil {
      * @description 删除文件，但是有过滤器
      * @date 2023/03/13 17:12
      */
-    public static void delFile(File f,FileFilter filter) {
+    public static void delFile(File f, FileFilter filter) {
         if (!f.isDirectory()) {
             f.delete();
             return;

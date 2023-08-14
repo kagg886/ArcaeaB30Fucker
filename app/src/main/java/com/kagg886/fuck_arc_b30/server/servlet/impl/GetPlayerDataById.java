@@ -22,7 +22,10 @@ import static com.kagg886.fuck_arc_b30.res.SongManager.scoreData;
  **/
 public class GetPlayerDataById extends AbstractServlet {
 
-    public GetPlayerDataById() {
+    public static final GetPlayerDataById INSTANCE = new GetPlayerDataById();
+
+
+    private GetPlayerDataById() {
         super("data/getPlayerDataById", Method.POST);
     }
 

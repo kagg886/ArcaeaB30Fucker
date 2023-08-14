@@ -14,7 +14,9 @@ import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
  * @date 2023/8/13 18:41
  **/
 public class RefreshResource extends AbstractServlet {
-    public RefreshResource() {
+    public static final RefreshResource INSTANCE = new RefreshResource();
+
+    private RefreshResource() {
         super("res/refreshResource",Method.GET);
     }
 

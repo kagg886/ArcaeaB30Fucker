@@ -24,8 +24,9 @@ import static com.kagg886.fuck_arc_b30.res.SongManager.songDetailsList;
  **/
 public class GetSongInfoById extends AbstractServlet {
 
+    public static final GetSongInfoById INSTANCE = new GetSongInfoById();
 
-    public GetSongInfoById() {
+    private GetSongInfoById() {
         super("res/getSongInfoById", Method.POST);
     }
 

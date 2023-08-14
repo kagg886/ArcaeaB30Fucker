@@ -21,7 +21,10 @@ import java.io.InputStream;
  * @date 2023/8/13 19:26
  **/
 public class Image extends AbstractServlet {
-    public Image() {
+
+    public static final Image INSTANCE = new Image();
+
+    private Image() {
         super("res/image", Method.GET);
     }
 
