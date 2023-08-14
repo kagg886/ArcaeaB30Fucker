@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 /**
@@ -50,7 +51,7 @@ public class SongManager {
     }
 
 
-    public static void init() throws IOException {
+    public static void init() throws IOException, InterruptedException {
         //初始化曲目详情
         try {
             String source = IOUtil.loadStringFromStream(Hooker.activity.getAssets().open("songs/songlist"));
@@ -118,6 +119,7 @@ public class SongManager {
             Log.e(SongManager.class.getName(), "Failed to load PlayerData", e);
         }
 
+        CountDownLatch latch = new CountDownLatch(1);
         Utils.runUntilNoError(() -> {
             //初始化定数详单
             Document dom;
@@ -164,8 +166,10 @@ public class SongManager {
             exactlyDiff.put("ii",new double[] {5.0,8.4,10.8}); //好像wiki上的ii和arc内部文件的ii拼写不一样
             //理想层面此值应该比内部文件的歌曲详情少两份，因为那两份是新手教程
             Log.i(SongManager.class.getName(), "exactly diff loaded:" + exactlyDiff.size());
+            latch.countDown();
         });
 
+        latch.await(); //阻塞程序，直到diff被加载
         Log.i(SongManager.class.getName(), "resource init success");
     }
 }
