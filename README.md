@@ -54,10 +54,11 @@
    | 1001 | 未输入id             |
    | 1002 | id不正确             |
    | 1003 | 未游玩此id代表的谱面 |
+   | 1004 | 某一数据输入错误     |
 
 4. 接口说明：
 
-   - 获取版本信息
+   - ### 获取版本信息
 
      **描述**
 
@@ -75,7 +76,7 @@
      | data.versionCode | 版本代码    |
      | data.versionName | 版本号      |
 
-   - 根据id获取歌曲详情
+   - ### 根据id获取歌曲详情
 
      **描述**
 
@@ -176,7 +177,7 @@
      }
      ```
 
-   - 根据id获取游玩成绩
+   - ### 根据id获取游玩成绩
    
      **描述**
    
@@ -276,7 +277,7 @@
      
      ```
    
-   - 刷新资源
+   - ### 刷新资源
    
      **描述**
    
@@ -292,7 +293,7 @@
      {"code":200,"msg":"success"}
      ```
    
-   - 获取图片
+   - ### 获取图片
    
      **描述**
    
@@ -313,3 +314,112 @@
      **返回示例**
    
      对应的曲绘，略
+     
+   - ### 获取Best30
+   
+     **描述**
+   
+     获取当前玩家存储的B30数据
+   
+     **URL**
+   
+     POST /data/b30
+   
+     **返回参数**
+   
+     | Key       | Description                               |
+     | --------- | ----------------------------------------- |
+     | data      | 本次获取的Best 30列表                     |
+     | data.name | 曲名                                      |
+     | data.ptt  | 单曲ptt                                   |
+     | data.data | 参考`根据id获取游玩成绩`中的 **返回参数** |
+   
+     **返回示例**
+   
+     ```json
+     {
+         "code": 200,
+         "data": [
+             {
+                 "data": {
+                     "clearStatus": 2,
+                     "difficulty": "FUTURE",
+                     "farCount": 10,
+                     "health": 100,
+                     "id": "cyaegha",
+                     "lostCount": 8,
+                     "perfectCount": 1350,
+                     "score": 9906210,
+                     "shinyPerfectCount": 1240
+                 },
+                 "name": "Cyaegha",
+                 "ptt": 12.23
+             },
+             {
+                 "data": {
+                     "clearStatus": 5,
+                     "difficulty": "FUTURE",
+                     "farCount": 16,
+                     "health": 100,
+                     "id": "singularity",
+                     "lostCount": 4,
+                     "perfectCount": 1085,
+                     "score": 9892336,
+                     "shinyPerfectCount": 934
+                 },
+                 "name": "Singularity",
+                 "ptt": 12.16
+             },
+             {
+                 "data": {
+                     "clearStatus": 5,
+                     "difficulty": "FUTURE",
+                     "farCount": 25,
+                     "health": 100,
+                     "id": "gou",
+                     "lostCount": 11,
+                     "perfectCount": 1486,
+                     "score": 9846934,
+                     "shinyPerfectCount": 1337
+                 },
+                 "name": "Misdeed -la bonté de Dieu et l'origine du mal-",
+                 "ptt": 12.13
+             },
+             {
+                 "data": {
+                     "clearStatus": 5,
+                     "difficulty": "FUTURE",
+                     "farCount": 18,
+                     "health": 100,
+                     "id": "lastcelebration",
+                     "lostCount": 4,
+                     "perfectCount": 1453,
+                     "score": 9913219,
+                     "shinyPerfectCount": 1355
+                 },
+                 "name": "Last Celebration",
+                 "ptt": 12.07
+             },
+             {
+                 "data": {
+                     "clearStatus": 5,
+                     "difficulty": "FUTURE",
+                     "farCount": 22,
+                     "health": 100,
+                     "id": "ringedgenesis",
+                     "lostCount": 8,
+                     "perfectCount": 1116,
+                     "score": 9835122,
+                     "shinyPerfectCount": 917
+                 },
+                 "name": "Ringed Genesis",
+                 "ptt": 11.98
+             },
+             ...and 25 items so on
+         ],
+         "msg": "success"
+     }
+     
+     ```
+   
+     

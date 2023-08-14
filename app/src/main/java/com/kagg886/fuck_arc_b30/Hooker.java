@@ -22,11 +22,12 @@ public class Hooker implements IXposedHookLoadPackage {
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
-        if (loadPackageParam.packageName.equals("moe.low.arc")) {
+        //兼容共存版arc
+        Class<?> AppActivityClass;
+        try {
             Utils.runAsync(() -> Log.i(Hooker.class.getName(), "Your Local IP is:" + Utils.getLocalIp()));
-
             //attach Context
-            Class<?> AppActivityClass = loadPackageParam.classLoader.loadClass("low.moe.AppActivity");
+            AppActivityClass = loadPackageParam.classLoader.loadClass("low.moe.AppActivity");
             Method onCreate = AppActivityClass.getDeclaredMethod("onCreate", Bundle.class);
             XposedBridge.hookMethod(onCreate, new XC_MethodHook() {
                 @Override
@@ -43,13 +44,14 @@ public class Hooker implements IXposedHookLoadPackage {
                     HttpServer.getInstance().addRoute(new GetSongInfoById());
                     HttpServer.getInstance().addRoute(new GetPlayerDataById());
                     HttpServer.getInstance().addRoute(new Image());
+                    HttpServer.getInstance().addRoute(new Best30());
 
                     HttpServer.getInstance().startServer(61616);
 
                     activity.runOnUiThread(() -> Toast.makeText(activity, "Arcaea B30 Server Started!", Toast.LENGTH_SHORT).show());
                 }
             });
-
+        } catch (ClassNotFoundException ignored) {
         }
     }
 }
