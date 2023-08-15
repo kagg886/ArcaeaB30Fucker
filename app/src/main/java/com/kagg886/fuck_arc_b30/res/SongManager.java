@@ -13,7 +13,6 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.kagg886.fuck_arc_b30.Hooker;
 import com.kagg886.fuck_arc_b30.server.model.SingleSongData;
-import com.kagg886.fuck_arc_b30.server.servlet.impl.Version;
 import com.kagg886.fuck_arc_b30.util.IOUtil;
 import com.kagg886.fuck_arc_b30.util.Utils;
 import org.jsoup.Jsoup;
@@ -22,7 +21,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
@@ -39,7 +37,7 @@ public class SongManager {
     //玩家的成绩
     public static List<SingleSongData> scoreData = new ArrayList<>();
 
-    public static Map<String, double[]> exactlyDiff = new HashMap<>();
+    public static Map<String, Object> exactlyDiff = new HashMap<>();
 
     public static JSONObject findSongsById(String id) {
         Optional<JSONObject> object = songDetailsList.stream()
@@ -124,13 +122,14 @@ public class SongManager {
         CountDownLatch latch = new CountDownLatch(1);
         Utils.runUntilNoError(() -> {
             SharedPreferences exactlyData = Hooker.activity.getSharedPreferences("arc_b30_fucker_exactly_data", Context.MODE_PRIVATE);
-            String dataVersion = exactlyData.getString("version",null);
+            String dataVersion = exactlyData.getString("version", null);
             PackageInfo info;
             try {
                 info = Hooker.activity.getPackageManager().getPackageInfo(Hooker.activity.getPackageName(), 0);
                 if (info.versionName.equals(dataVersion)) {
-                    exactlyDiff = JSON.parseObject(exactlyData.getString("list",null),HashMap.class);
-                    Log.i(SongManager.class.getName(),"loaded exactly diff from cache");
+                    exactlyDiff = JSON.parseObject(exactlyData.getString("list", null), HashMap.class);
+                    Log.i(SongManager.class.getName(), "loaded exactly diff from cache");
+                    Log.v(SongManager.class.getName(), exactlyDiff.toString());
                     latch.countDown();
                     return;
                 }
@@ -159,7 +158,9 @@ public class SongManager {
 
                 if (byd != -1 && name.equals("Quon")) { //因为Quon的名字有2个
                     name = "quonwacca";
-                } else  {
+                } else if (ftr == 9.9 && name.equals("Genesis")) {
+                    name = "genesischunithm";
+                } else {
                     String finalName = name;
                     JSONObject object;
                     try {
@@ -180,9 +181,9 @@ public class SongManager {
                 }
                 exactlyDiff.put(name, new double[]{pst, prs, ftr, byd});
             }
-            exactlyDiff.put("ii",new double[] {5.0,8.4,10.8}); //好像wiki上的ii和arc内部文件的ii拼写不一样
+            exactlyDiff.put("ii", new double[]{5.0, 8.4, 10.8, -1}); //好像wiki上的ii和arc内部文件的ii拼写不一样
 
-            exactlyData.edit().putString("version",info.versionName).putString("list",JSON.toJSONString(exactlyDiff)).apply();
+            exactlyData.edit().putString("version", info.versionName).putString("list", JSON.toJSONString(exactlyDiff)).apply();
             //理想层面此值应该比内部文件的歌曲详情少两份，因为那两份是新手教程
             Log.i(SongManager.class.getName(), "exactly diff loaded:" + exactlyDiff.size());
             latch.countDown();

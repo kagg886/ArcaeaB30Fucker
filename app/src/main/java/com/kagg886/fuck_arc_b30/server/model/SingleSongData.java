@@ -10,28 +10,62 @@ import java.util.Arrays;
  **/
 public class SingleSongData {
     //id
-    private final String id;
+    private String id;
     //分数
-    private final int score;
+    private int score;
     //大P
-    private final int shinyPerfectCount;
+    private int shinyPerfectCount;
     //P
-    private final int perfectCount;
+    private int perfectCount;
     //Far
-    private final int farCount;
+    private int farCount;
     //Lost
-    private final int lostCount;
+    private int lostCount;
     //难度
-    private final Difficulty difficulty;
+    private Difficulty difficulty;
     //通关状态
-    private final int clearStatus;
+    private int clearStatus;
 
     //血量
-    private final int health;
+    private int health;
 
+    public void setId(String id) {
+        this.id = id;
+    }
 
+    public void setScore(int score) {
+        this.score = score;
+    }
 
-    public SingleSongData(String id, int score, int shinyPerfectCount, int perfectCount, int farCount, int lostCount,Difficulty difficulty, int clearStatus,int health) {
+    public void setShinyPerfectCount(int shinyPerfectCount) {
+        this.shinyPerfectCount = shinyPerfectCount;
+    }
+
+    public void setPerfectCount(int perfectCount) {
+        this.perfectCount = perfectCount;
+    }
+
+    public void setFarCount(int farCount) {
+        this.farCount = farCount;
+    }
+
+    public void setLostCount(int lostCount) {
+        this.lostCount = lostCount;
+    }
+
+    public void setDifficulty(Difficulty difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public void setClearStatus(int clearStatus) {
+        this.clearStatus = clearStatus;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public SingleSongData(String id, int score, int shinyPerfectCount, int perfectCount, int farCount, int lostCount, Difficulty difficulty, int clearStatus, int health) {
         this.id = id;
         this.score = score;
         this.shinyPerfectCount = shinyPerfectCount;
@@ -79,48 +113,9 @@ public class SingleSongData {
         return health;
     }
 
-    public static class ClearStatus {
-        //0为TL
-        //1为普通C
-        //2为FR
-        //3为PM
-        //4为简单C
-        //5为困难C
-        public static boolean isPM(SingleSongData data) {
-            return data.clearStatus == 3;
-        }
-
-        public static boolean isFR(SingleSongData data) {
-            return isPM(data) || data.clearStatus == 2;
-        }
-
-        public static boolean isTL(SingleSongData data) {
-            return data.clearStatus == 0;
-        }
-
-        public static SingleSongData.ClearStatus.Difficulty getDiff(SingleSongData data) {
-            return Difficulty.valueOf(data.clearStatus);
-        }
-
-
-
-        public enum Difficulty {
-            EASY(4),NORMAL(1),HARD(5);
-            private final int diff;
-
-            Difficulty(int i) {
-                this.diff = i;
-            }
-
-            public static Difficulty valueOf(int i) {
-                return Arrays.stream(values()).filter((v) -> v.diff == i).findFirst().get();
-            }
-        }
-    }
-
     public enum Difficulty {
         PAST(0),PRESENT(1),FUTURE(2),BEYOND(3);
-        private final int diff;
+        private int diff;
 
         Difficulty(int i) {
             this.diff = i;

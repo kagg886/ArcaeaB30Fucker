@@ -91,7 +91,13 @@ public class Image extends AbstractServlet {
         try (InputStream stream = Hooker.activity.getAssets().open(queryUrl)) {
             response.send("image/jpeg", IOUtil.loadByteFromStream(stream));
         } catch (FileNotFoundException e) {
-            response.send(JSON.toJSONString(Result.ERR_ID_NOT_EXISTS.apply(id)));
+            id = "dl_" + id;
+            queryUrl = "songs/" + id + "/" + songName + size + ".jpg";
+            try (InputStream stream = Hooker.activity.getAssets().open(queryUrl)) {
+                response.send("image/jpeg", IOUtil.loadByteFromStream(stream));
+            } catch (FileNotFoundException e0) {
+                response.send(JSON.toJSONString(Result.ERR_ID_NOT_EXISTS.apply(id)));
+            }
         }
     }
 }

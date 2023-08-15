@@ -2,11 +2,14 @@ package com.kagg886.fuck_arc_b30.util;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.kagg886.fuck_arc_b30.server.model.Result;
+import com.kagg886.fuck_arc_b30.server.model.SingleSongData;
 import com.kagg886.fuck_arc_b30.server.servlet.AbstractServlet;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.AssetsGet;
+import com.kagg886.fuck_arc_b30.server.servlet.impl.Image;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
@@ -55,6 +58,25 @@ public class IOUtil {
                 .timeout(5000)
                 .data("path", path)
                 .execute();
+        return BitmapFactory.decodeStream(response.bodyStream());
+    }
+
+    public static Bitmap loadArcaeaSongImage(SingleSongData data) throws IOException {
+        if (data.getId() == null) {
+            Log.d(IOUtil.class.getName(),data + "is illegal");
+        }
+        Connection.Response response = Jsoup.connect(base + Image.INSTANCE.getPath())
+                .ignoreContentType(true)
+                .method(Image.INSTANCE.getMethod() == AbstractServlet.Method.POST ? Connection.Method.POST : Connection.Method.GET)
+                .timeout(5000)
+                .data("id",data.getId())
+                .data("difficulty",data.getDifficulty().name())
+                .execute();
+
+        //| *id        | 一个字符串，代表要查询的id                   |
+        //| ---------- | -------------------------------------------- |
+        //| difficulty | 难度，可以填写难度和难度代号，默认为future。 |
+        //| size       | 大小，可填写256和512，默认为256              |
         return BitmapFactory.decodeStream(response.bodyStream());
     }
 

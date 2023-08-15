@@ -1,7 +1,9 @@
 package com.kagg886.fuck_arc_b30.server.servlet.impl;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.kagg886.fuck_arc_b30.res.SongManager;
 import com.kagg886.fuck_arc_b30.server.model.Best30Model;
 import com.kagg886.fuck_arc_b30.server.model.Result;
@@ -37,7 +39,18 @@ public class Best30 extends AbstractServlet {
         SongManager.scoreData.forEach((v) -> {
             String id = v.getId();
             double ptt;
-            double ex_diff = SongManager.exactlyDiff.get(id)[v.getDifficulty().getDiff()];
+            double ex_diff;
+            try {
+                ex_diff = ((double[]) SongManager.exactlyDiff.get(id))[v.getDifficulty().getDiff()];
+            } catch (Exception e) {
+                try {
+                    ex_diff = ((JSONArray) SongManager.exactlyDiff.get(id)).getDouble(v.getDifficulty().getDiff());
+                } catch (Exception p) {
+                    Log.e(getClass().getName(),"ex_diff:" + id + "not found!");
+                    response.send(JSON.toJSONString(Result.ERR_ID_NOT_EXISTS));
+                    return;
+                }
+            }
             if (v.getScore() > 10_000_000) {
                 ptt = ex_diff + 2;
             } else if (v.getScore() < 9_800_000) {
@@ -54,11 +67,14 @@ public class Best30 extends AbstractServlet {
             Best30Model model = new Best30Model(
                     SongManager.findSongsById(id).getJSONObject("title_localized").getString("en"),
                     v,
-                    Double.parseDouble(String.format("%.2f", ptt)));
+                    Double.parseDouble(String.format("%.2f", ptt)),
+                    ex_diff
+            );
             models.add(model);
         });
 
         models.sort((a, b) -> Double.compare(b.getPtt(), a.getPtt()));
         response.send(JSON.toJSONString(Result.OK(models.subList(0,Math.min(30,models.size())))));
+//        response.send(JSON.toJSONString(Result.OK(models)));
     }
 }
