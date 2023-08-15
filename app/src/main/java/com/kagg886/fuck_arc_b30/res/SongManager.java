@@ -68,7 +68,8 @@ public class SongManager {
             Cursor cursor = sqlite.rawQuery("select * from cleartypes", null);
             if (cursor.moveToFirst()) {
                 do {
-                    clearTypes.put(cursor.getString(1), cursor.getInt(3));
+                    //同一id可能有不同难度
+                    clearTypes.put(cursor.getString(1) + "_" + cursor.getString(2), cursor.getInt(3));
                     //id --> 0
                     //songId --> 1
                     //songDifficulty --> 2
@@ -108,7 +109,7 @@ public class SongManager {
                             cursor.getInt(5),
                             cursor.getInt(6),
                             SingleSongData.Difficulty.valueOf(cursor.getInt(9)),
-                            clearTypes.getOrDefault(id, -1),
+                            clearTypes.getOrDefault(id + "_" + cursor.getString(9), -1),
                             cursor.getInt(11)
                     ));
                 } while (cursor.moveToNext());

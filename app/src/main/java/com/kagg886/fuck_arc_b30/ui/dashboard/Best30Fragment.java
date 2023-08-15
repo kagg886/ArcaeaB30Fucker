@@ -10,11 +10,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.kagg886.fuck_arc_b30.MainActivity;
 import com.kagg886.fuck_arc_b30.R;
 import com.kagg886.fuck_arc_b30.databinding.FragmentBest30Binding;
 import com.kagg886.fuck_arc_b30.server.model.Best30Model;
@@ -99,7 +103,11 @@ public class Best30Fragment extends Fragment {
                     binding.fragmentB30Bg.setBackground(new BitmapDrawable(getResources(),ratingImg));
                 });
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                getActivity().runOnUiThread(() -> {
+                    Toast.makeText(getContext(), "B30拉取失败，请检查服务端存活状态", Toast.LENGTH_SHORT).show();
+                    ((MainActivity) getActivity()).navigateTo(R.id.navigation_home);
+                });
+
             }
         }).start();
 
@@ -118,6 +126,11 @@ public class Best30Fragment extends Fragment {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.card_b30, null);
         view.setId(View.generateViewId());
 
+        view.setOnClickListener((v) -> {
+            new AlertDialog.Builder(getActivity()).setTitle("DebugWindow")
+                    .setMessage(JSON.toJSONString(best30Model)).show();
+        });
+
         TextView b30Name, b30Score, b30Ptt, b30CountP, b30CountF, b30CountL;
         b30Name = view.findViewById(R.id.b30_name);
         b30Score = view.findViewById(R.id.b30_score);
@@ -132,7 +145,11 @@ public class Best30Fragment extends Fragment {
         ImageView b30SongImg = view.findViewById(R.id.b30_song_img);
 
 
-        b30Name.setText(best30Model.getName());
+        String name = best30Model.getName();
+        if (name.length() > 18) {
+            name = name.substring(0,16) + "...";
+        }
+        b30Name.setText(name);
         b30Score.setText(String.valueOf(data.getScore()));
         b30Ptt.setText(String.format("%.2f(%.2f)", best30Model.getPtt(), best30Model.getEx_diff()));
         b30CountP.setText(String.format("Pure:%d(%d)", data.getPerfectCount(), data.getShinyPerfectCount()));
@@ -187,7 +204,11 @@ public class Best30Fragment extends Fragment {
                     b30ScoreType.setImageBitmap(scoreTypeImg);
                 });
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                getActivity().runOnUiThread(() -> {
+                    Toast.makeText(getContext(), "B30图片加载失败，请检查服务端存活状态", Toast.LENGTH_SHORT).show();
+                    ((MainActivity) getActivity()).navigateTo(R.id.navigation_home);
+                });
+
             }
         }).start();
 
