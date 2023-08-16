@@ -4,10 +4,12 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -20,6 +22,7 @@ import com.kagg886.fuck_arc_b30.util.IOUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Objects;
@@ -29,6 +32,10 @@ import java.util.zip.ZipOutputStream;
 
 public class MainActivity extends AppCompatActivity {
     private NavController navController;
+
+    private ActivityResultLauncher<Intent> writeCall;
+
+    private String file_path;
 
     public void navigateTo(@IdRes int id) {
         navController.navigate(id);
@@ -55,7 +62,23 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
+        writeCall = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getData() == null) {
+                return;
+            }
+            try {
+                OutputStream stream = getContentResolver().openOutputStream(result.getData().getData());
+                stream.write(IOUtil.loadByteFromFile(new File(file_path)));
+                stream.close();
+            } catch (Exception e) {
+                Log.w(getClass().getName(), "export failed!", e);
+            }
 
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("温馨提示")
+                    .setMessage("导出文件并找到文件后，您可以：\n1. 前往设置打开Github仓库，新开issue上传此文件\n2. 发送此文件到 'iveour@163.com'")
+                    .show();
+        });
         if (getIntent() != null && getIntent().getExtras() != null && getIntent().getExtras().containsKey("error")) {
             Throwable throwable = ((Throwable) getIntent().getExtras().getSerializable("error"));
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -67,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     info = IOUtil.fetch(Version.INSTANCE, Version.AppVersionInfo.class);
                 } catch (IOException ignored) {
-                    info = new Version.AppVersionInfo("-1",-1);
+                    info = new Version.AppVersionInfo("-1", -1);
                 }
                 StringBuilder fileWriter = new StringBuilder();
                 fileWriter.append("---AppCrashLogSummary---");
@@ -113,21 +136,18 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 
-                    quickShare(target,"*/*");
+                    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("*/*");
+                    this.file_path = target.getAbsolutePath();
+                    intent.putExtra(Intent.EXTRA_TITLE, target.getName());
+                    writeCall.launch(intent);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }).start());
             builder.show();
         }
-    }
-
-
-    public void quickShare(File p, String type) {
-        Intent intent = new Intent("android.intent.action.SEND");
-        intent.putExtra("android.intent.extra.STREAM", FileProvider.getUriForFile(this, "com.kagg886.fuck_arc_b30.fileprovider", p));
-        intent.setType(type);
-        startActivity(intent);
     }
 
 }
