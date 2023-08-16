@@ -58,6 +58,8 @@ public class Best30Fragment extends Fragment {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle("b30拉取失败");
                     builder.setMessage("拉取body如下:\n" + body + "\n截图前往github提交issue！");
+                    getActivity().runOnUiThread(builder::show);
+                    ((MainActivity) getActivity()).navigateTo(R.id.navigation_home);
                     return;
                 }
                 List<Best30Model> models = new ArrayList<>();
