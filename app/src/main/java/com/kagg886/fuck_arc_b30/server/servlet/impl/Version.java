@@ -34,6 +34,11 @@ public class Version extends AbstractServlet {
             versionCode = BuildConfig.VERSION_CODE;
         }
 
+        public AppVersionInfo(String s, int i) {
+            this.versionName = s;
+            this.versionCode = i;
+        }
+
         public String getVersionName() {
             return versionName;
         }

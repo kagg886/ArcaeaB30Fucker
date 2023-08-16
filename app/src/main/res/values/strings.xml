@@ -14,4 +14,7 @@
     <string name="best30_status">Best30 Status</string>
     <string name="cyaegha">Fracture Ray</string>
     <string name="test_123">Pure:2221(2221)</string>
+    <string name="setting">设置</string>
+    <string name="setting_header_debug">调试设置</string>
+    <string name="setting_header_version">本地版本</string>
 </resources>

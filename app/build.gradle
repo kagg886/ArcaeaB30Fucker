@@ -5,12 +5,16 @@ plugins {
 android {
     compileSdk 34
 
+    //1.当修改Bug和优化功能时，修改叠加第三位数字，即Z+1.其他不变。例如：V1.0.0——V1.0.1。
+    //2.当新增小功能时，修改叠加第二位数次，即Y+1.其他不变。例如：V1.0.0——V1.1.0。
+    //3.当新增大功能或者对原有功能有大改动时，修改叠加第一位数次，即X+1.其他不变。例如：V1.0.0——V2.0.0。
+    //4.前面的位数叠加后，后面的位数从零开始计算。
     defaultConfig {
         applicationId "com.kagg886.fuck_arc_b30"
         minSdk 28
         targetSdk 32
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "V1.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -37,6 +41,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
     implementation 'androidx.navigation:navigation-fragment:2.7.0'
     implementation 'androidx.navigation:navigation-ui:2.7.0'
+    implementation 'androidx.preference:preference:1.2.1'
 
     compileOnly (fileTree(dir: "libs", include: ["*.jar"]))
     implementation 'androidx.appcompat:appcompat:1.6.1'

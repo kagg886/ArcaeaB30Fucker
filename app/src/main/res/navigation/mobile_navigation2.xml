@@ -22,4 +22,9 @@
             android:name="com.kagg886.fuck_arc_b30.ui.notifications.NotificationsFragment"
             android:label="@string/title_query"
             tools:layout="@layout/fragment_notifications"/>
+
+    <fragment
+            android:id="@+id/navigation_setting"
+            android:name="com.kagg886.fuck_arc_b30.ui.setting.SettingsFragment"
+            android:label="@string/setting"/>
 </navigation>

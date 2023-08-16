@@ -1,0 +1,43 @@
+<PreferenceScreen
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+            app:title="@string/setting_header_debug">
+
+        <Preference
+                android:key="setting_throw_error"
+                app:summary="调试用，不要手欠qaq"
+                app:title="模拟崩溃">
+        </Preference>
+
+
+        <Preference
+                android:key="setting_clean_cache"
+                app:summary="随手一清，有你有我有他"
+                app:title="清除日志信息">
+        </Preference>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            app:title="@string/setting_header_version">
+
+        <Preference
+                android:key="setting_vName"
+                app:title="版本名">
+        </Preference>
+
+
+        <Preference
+                android:key="setting_vCode"
+                app:title="版本号">
+        </Preference>
+
+        <Preference
+                android:key="setting_goGithub"
+                app:summary="审查源代码，提交issue并修复bug"
+                app:title="查看Github仓库">
+        </Preference>
+    </PreferenceCategory>
+
+</PreferenceScreen>
