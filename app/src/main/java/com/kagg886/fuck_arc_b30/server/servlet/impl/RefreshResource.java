@@ -24,8 +24,12 @@ public class RefreshResource extends AbstractServlet {
 
     @Override
     public void onRequest0(AsyncHttpServerRequest request, AsyncHttpServerResponse response) throws Throwable {
-        Hooker.activity.getSharedPreferences("arc_b30_fucker_exactly_data", Context.MODE_PRIVATE).edit().remove("version");
-        SongManager.init();
+        Hooker.activity.getSharedPreferences("arc_b30_fucker_exactly_data", Context.MODE_PRIVATE).edit().remove("version").apply();
+        try {
+            SongManager.init();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         response.send(JSON.toJSONString(Result.OK()));
     }
 }
