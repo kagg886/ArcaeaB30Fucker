@@ -14,11 +14,14 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
+import java.io.File;
 import java.lang.reflect.Method;
 
 public class Hooker implements IXposedHookLoadPackage {
     @SuppressLint("StaticFieldLeak")
     public static Activity activity;
+
+    public static File logBase;
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
@@ -34,6 +37,8 @@ public class Hooker implements IXposedHookLoadPackage {
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     activity = ((Activity) param.thisObject);
                     Log.i(Hooker.class.getName(), "App Activity is Find!");
+                    //init Logger
+                    logBase = activity.getCacheDir().toPath().resolve("server.log").toFile();
 
                     //init Resources
                     SongManager.init();
@@ -46,6 +51,7 @@ public class Hooker implements IXposedHookLoadPackage {
                     HttpServer.getInstance().addRoute(Image.INSTANCE);
                     HttpServer.getInstance().addRoute(Best30.INSTANCE);
                     HttpServer.getInstance().addRoute(AssetsGet.INSTANCE);
+                    HttpServer.getInstance().addRoute(DumpLog.INSTANCE);
 
                     HttpServer.getInstance().startServer(61616);
 

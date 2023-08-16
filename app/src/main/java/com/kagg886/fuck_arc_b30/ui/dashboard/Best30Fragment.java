@@ -52,6 +52,14 @@ public class Best30Fragment extends Fragment {
 
                 JSONArray arr = JSON.parseObject(body).getJSONArray("data");
 
+                if (arr == null) {
+                    Log.e(getClass().getName(),"B30 fetch failed!,response:" + body);
+                    ((MainActivity) getActivity()).navigateTo(R.id.navigation_home);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("b30拉取失败");
+                    builder.setMessage("拉取body如下:\n" + body + "\n截图前往github提交issue！");
+                    return;
+                }
                 List<Best30Model> models = new ArrayList<>();
                 arr.forEach((model) -> {
                     JSONObject source = (JSONObject) model;

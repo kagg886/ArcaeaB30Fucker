@@ -51,12 +51,13 @@ public class SongManager {
     }
 
 
-    public static void init() throws IOException, InterruptedException {
+    public static void init() throws InterruptedException {
         //初始化曲目详情
         try {
             String source = IOUtil.loadStringFromStream(Hooker.activity.getAssets().open("songs/songlist"));
             songDetailsList = JSON.parseObject(source).getJSONArray("songs");
             Log.i(SongManager.class.getName(), "Load song list:" + songDetailsList.size());
+            Log.v(SongManager.class.getName(), "song list dump:" + source);
         } catch (IOException e) {
             Log.e(SongManager.class.getName(), "Load Song List Failed!", e);
         }
@@ -116,6 +117,8 @@ public class SongManager {
             }
             cursor.close();
             Log.i(SongManager.class.getName(), "load playerData successful");
+            Log.v(SongManager.class.getName(), "scoreData dump:" + scoreData);
+            Log.v(SongManager.class.getName(), "clearTypesOrigin dump:" + clearTypes);
         } catch (Exception e) {
             Log.e(SongManager.class.getName(), "Failed to load PlayerData", e);
         }
@@ -130,7 +133,7 @@ public class SongManager {
                 if (info.versionName.equals(dataVersion)) {
                     exactlyDiff = JSON.parseObject(exactlyData.getString("list", null), HashMap.class);
                     Log.i(SongManager.class.getName(), "loaded exactly diff from cache");
-                    Log.v(SongManager.class.getName(), exactlyDiff.toString());
+                    Log.v(SongManager.class.getName(), String.format("exactlyDiff(offline) dump:\nVersion:%s\nDump:%s",dataVersion,exactlyDiff.toString()));
                     latch.countDown();
                     return;
                 }
@@ -186,7 +189,8 @@ public class SongManager {
 
             exactlyData.edit().putString("version", info.versionName).putString("list", JSON.toJSONString(exactlyDiff)).apply();
             //理想层面此值应该比内部文件的歌曲详情少两份，因为那两份是新手教程
-            Log.i(SongManager.class.getName(), "exactly diff loaded:" + exactlyDiff.size());
+            Log.i(SongManager.class.getName(), "loaded exactly diff from arcaea wiki");
+            Log.v(SongManager.class.getName(), String.format("exactlyDiff(online) dump:\nVersion:%s\nDump:%s",info.versionName,JSON.toJSONString(exactlyDiff)));
             latch.countDown();
         });
 

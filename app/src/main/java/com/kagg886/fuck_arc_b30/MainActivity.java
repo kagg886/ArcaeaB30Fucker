@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.IdRes;
@@ -16,8 +17,10 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.kagg886.fuck_arc_b30.databinding.ActivityMain2Binding;
+import com.kagg886.fuck_arc_b30.server.servlet.impl.DumpLog;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.Version;
 import com.kagg886.fuck_arc_b30.util.IOUtil;
+import com.kagg886.fuck_arc_b30.util.Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -85,69 +88,92 @@ public class MainActivity extends AppCompatActivity {
             builder.setTitle("错误捕获");
             builder.setMessage("捕获了一个错误，是否写出崩溃报告?");
             builder.setNegativeButton("否", null);
-            builder.setPositiveButton("是", (dialogInterface, i) -> new Thread(() -> {
-                Version.AppVersionInfo info;
-                try {
-                    info = IOUtil.fetch(Version.INSTANCE, Version.AppVersionInfo.class);
-                } catch (IOException ignored) {
-                    info = new Version.AppVersionInfo("-1", -1);
-                }
-                StringBuilder fileWriter = new StringBuilder();
-                fileWriter.append("---AppCrashLogSummary---");
-                fileWriter.append("\nCrashTime:").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
-                fileWriter.append("\nBaseLogFile:").append(((CrashHandler) getApplication()).getCatcher().getFile().getName());
-                fileWriter.append("\n---DeviceInfo---");
-                fileWriter.append("\nAndroid-Version:").append(Build.VERSION.RELEASE);
-                fileWriter.append("\nModel:").append(Build.MODEL);
-                fileWriter.append("\nLocal-Version:").append(BuildConfig.VERSION_NAME).append("(").append(BuildConfig.VERSION_CODE).append(")");
-                fileWriter.append("\nRemote-Version:").append(info.getVersionName()).append("(").append(info.getVersionCode()).append(")");
-                fileWriter.append("\n---StackTrace---\n");
-                fileWriter.append(IOUtil.getException(throwable));
-                fileWriter.append("\n----------Report End----------");
 
-
-                File base = ((CrashHandler) getApplication()).getLoggerBase();
-
-                File target = new File(getCacheDir(), "Log-" + UUID.randomUUID().toString() + ".zip");
-                try {
-                    target.createNewFile();
-                    try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(target.toPath()))) {
-                        //write Summary
-                        out.putNextEntry(new ZipEntry("Summary.txt"));
-                        byte[] summaryByte = fileWriter.toString().getBytes();
-                        out.write(summaryByte, 0, summaryByte.length);
-
-                        //write Log.txt
-                        for (File log : Objects.requireNonNull(base.listFiles())) {
-                            ZipEntry entry = new ZipEntry("log/" + log.getName());
-                            out.putNextEntry(entry);
-
-                            try (FileInputStream stream = new FileInputStream(log)) {
-                                byte[] buffer = new byte[1024];
-                                int len;
-                                while ((len = stream.read(buffer)) != -1) {
-                                    out.write(buffer, 0, len);
-                                }
-//                                byte[] buffer = new byte[1024];
-//                                int readOnly = stream.read(buffer);
-//                                //使用缓冲区，效率杠杠的
-//                                out.write(buffer, 0, readOnly);
-                            }
-                        }
-                    }
-
-                    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    intent.setType("*/*");
-                    this.file_path = target.getAbsolutePath();
-                    intent.putExtra(Intent.EXTRA_TITLE, target.getName());
-                    writeCall.launch(intent);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }).start());
+            builder.setNeutralButton("是(仅写出本地报告)", (a, b) -> {
+                Utils.runUntilNoError(() -> writeLocalReportAndShare(throwable, false));
+            });
+            builder.setPositiveButton("是(写出服务端报告)", (dialogInterface, i) ->{
+                runOnUiThread(() -> Toast.makeText(this, "若迟迟不出导出页面，请打开Arcaea后将后台切回到这里", Toast.LENGTH_SHORT).show());
+                Utils.runUntilNoError(() -> writeLocalReportAndShare(throwable, true));
+            });
             builder.show();
         }
     }
 
+
+    private void writeLocalReportAndShare(Throwable throwable, boolean writeServerLog) {
+        Version.AppVersionInfo info;
+        String serverLog = null;
+        try {
+            info = IOUtil.fetch(Version.INSTANCE, Version.AppVersionInfo.class);
+            serverLog = IOUtil.fetch(DumpLog.INSTANCE, String.class);
+        } catch (IOException e) {
+            if (writeServerLog) {
+                Log.e(getClass().getName(), "dump message must connect the server,now reloading...");
+                throw new RuntimeException(e);
+            } else {
+                info = new Version.AppVersionInfo("-1", -1);
+            }
+        }
+
+        StringBuilder fileWriter = new StringBuilder();
+        fileWriter.append("---AppCrashLogSummary---");
+        fileWriter.append("\nCrashTime:").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(System.currentTimeMillis()));
+        fileWriter.append("\nBaseLogFile:").append(((CrashHandler) getApplication()).getCatcher().getFile().getName());
+        fileWriter.append("\n---DeviceInfo---");
+        fileWriter.append("\nAndroid-Version:").append(Build.VERSION.RELEASE);
+        fileWriter.append("\nModel:").append(Build.MODEL);
+        fileWriter.append("\nLocal-Version:").append(BuildConfig.VERSION_NAME).append("(").append(BuildConfig.VERSION_CODE).append(")");
+        fileWriter.append("\nRemote-Version:").append(info.getVersionName()).append("(").append(info.getVersionCode()).append(")");
+        fileWriter.append("\n---StackTrace---\n");
+        fileWriter.append(IOUtil.getException(throwable));
+        fileWriter.append("\n----------Report End----------");
+
+
+        File base = ((CrashHandler) getApplication()).getLoggerBase();
+
+        File target = new File(getCacheDir(), "Log-" + UUID.randomUUID().toString() + ".zip");
+        try {
+            target.createNewFile();
+            try (ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(target.toPath()))) {
+                //write Summary
+                out.putNextEntry(new ZipEntry("Summary.txt"));
+                byte[] summaryByte = fileWriter.toString().getBytes();
+                out.write(summaryByte);
+
+                if (writeServerLog) {
+                    out.putNextEntry(new ZipEntry("Server.log"));
+                    byte[] serverByte = serverLog.getBytes();
+                    out.write(serverByte);
+                }
+
+                //write Log.txt
+                for (File log : Objects.requireNonNull(base.listFiles())) {
+                    ZipEntry entry = new ZipEntry("log/" + log.getName());
+                    out.putNextEntry(entry);
+
+                    try (FileInputStream stream = new FileInputStream(log)) {
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        while ((len = stream.read(buffer)) != -1) {
+                            out.write(buffer, 0, len);
+                        }
+//                                byte[] buffer = new byte[1024];
+//                                int readOnly = stream.read(buffer);
+//                                //使用缓冲区，效率杠杠的
+//                                out.write(buffer, 0, readOnly);
+                    }
+                }
+            }
+
+            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            this.file_path = target.getAbsolutePath();
+            intent.putExtra(Intent.EXTRA_TITLE, target.getName());
+            writeCall.launch(intent);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

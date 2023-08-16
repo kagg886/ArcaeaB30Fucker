@@ -44,11 +44,18 @@ public class IOUtil {
                 .timeout(5000)
                 .execute()
                 .body();
-        JSONObject json = JSON.parseObject(body);
-        if (json.getIntValue("code") != Result.OK().getCode()) {
-            throw new IOException(json.getString("msg"));
+        try {
+            JSONObject json = JSON.parseObject(body);
+            if (json.getIntValue("code") != Result.OK().getCode()) {
+                throw new IOException(json.getString("msg"));
+            }
+            return JSON.parseObject(json.getJSONObject("data").toString(), resultClass);
+        } catch (Exception e) {
+            if (resultClass == String.class) {
+                return (T) body;
+            }
         }
-        return JSON.parseObject(json.getJSONObject("data").toString(), resultClass);
+        return null;
     }
 
     public static Bitmap loadArcaeaResource(String path) throws IOException {
@@ -63,14 +70,14 @@ public class IOUtil {
 
     public static Bitmap loadArcaeaSongImage(SingleSongData data) throws IOException {
         if (data.getId() == null) {
-            Log.d(IOUtil.class.getName(),data + "is illegal");
+            Log.d(IOUtil.class.getName(), data + "is illegal");
         }
         Connection.Response response = Jsoup.connect(base + Image.INSTANCE.getPath())
                 .ignoreContentType(true)
                 .method(Image.INSTANCE.getMethod() == AbstractServlet.Method.POST ? Connection.Method.POST : Connection.Method.GET)
                 .timeout(5000)
-                .data("id",data.getId())
-                .data("difficulty",data.getDifficulty().name())
+                .data("id", data.getId())
+                .data("difficulty", data.getDifficulty().name())
                 .execute();
 
         //| *id        | 一个字符串，代表要查询的id                   |
