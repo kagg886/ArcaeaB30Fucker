@@ -140,53 +140,44 @@ public class SongManager {
         }
     }
 
+    //此boolean用以区分调用场景为api刷新还是初始化刷新
+    public static void init() {
+        init(false);
+    }
 
-    public static void init() throws InterruptedException {
+    public static void init(boolean exitApp) {
         //初始化曲目详情
         loadSongList();
         //初始化歌曲成绩
         loadScoreData();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        Utils.runUntilNoError(() -> {
-            SharedPreferences exactlyData = Hooker.activity.getSharedPreferences("arc_b30_fucker_exactly_data", Context.MODE_PRIVATE);
-            String dataVersion = exactlyData.getString("version", null);
-            PackageInfo info;
-            try {
-                info = Hooker.activity.getPackageManager().getPackageInfo(Hooker.activity.getPackageName(), 0);
-                if (info.versionName.equals(dataVersion)) {
-                    exactlyDiff = JSON.parseObject(exactlyData.getString("list", null), HashMap.class);
-                    Log.i(SongManager.class.getName(), "loaded exactly diff from cache");
-                    Log.v(SongManager.class.getName(), String.format("exactlyDiff(offline) dump:\nVersion:%s\nDump:%s", dataVersion, exactlyDiff.toString()));
-                    latch.countDown();
-                    return;
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new RuntimeException(e);
+        SharedPreferences exactlyData = Hooker.activity.getSharedPreferences("arc_b30_fucker_exactly_data", Context.MODE_PRIVATE);
+        String dataVersion = exactlyData.getString("version", null);
+        PackageInfo info;
+        try {
+            info = Hooker.activity.getPackageManager().getPackageInfo(Hooker.activity.getPackageName(), 0);
+            if (info.versionName.equals(dataVersion)) {
+                exactlyDiff = JSON.parseObject(exactlyData.getString("list", null), HashMap.class);
+                Log.i(SongManager.class.getName(), "loaded exactly diff from cache");
+                Log.v(SongManager.class.getName(), String.format("exactlyDiff(offline) dump:\nVersion:%s\nDump:%s", dataVersion, exactlyDiff.toString()));
+                Log.i(SongManager.class.getName(), "resource init success");
+                return;
             }
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
-            //初始化定数详单
+        //初始化定数详单
+        AtomicReference<String> errSongId = new AtomicReference<>();
+        AtomicReference<Throwable> err = new AtomicReference<>(null);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Utils.runAsync(() -> {
             JSONObject ex_diff_online = null;
-            AtomicReference<String> errSongId = new AtomicReference<>();
             try {
                 Document dom = Jsoup.connect("https://wiki.arcaea.cn/index.php?title=Template:ChartConstant.json&action=edit").get();
                 ex_diff_online = JSON.parseObject(dom.getElementById("wpTextbox1").text());
-                //unit:
-//                "alexandrite": [
-//                    {
-//                        "constant": 4.5,
-//                            "old": false
-//                    },
-//                    {
-//                        "constant": 7,
-//                            "old": false
-//                    },
-//                    {
-//                        "constant": 10,
-//                        "old": false
-//                    }
-//                ],
-
                 ex_diff_online.forEach((id, value1) -> {
                     errSongId.set(id);
                     double[] value = ((JSONArray) value1)
@@ -197,35 +188,53 @@ public class SongManager {
                     exactlyDiff.put(id, value);
                 });
             } catch (Exception e) {
+                err.set(e);
                 Log.e(SongManager.class.getName(), "fetch ex_diff_online error: " + errSongId.get() + "->" + ex_diff_online.get(errSongId.get()).toString());
+            }
+            latch.countDown();
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (err.get() != null) {
+            if (exitApp) {
                 Hooker.activity.runOnUiThread(() -> {
                     Toast.makeText(Hooker.activity, "在线定数表拉取失败，请尝试重新启动Arcaea!", Toast.LENGTH_SHORT).show();
                     Hooker.activity.finish();
                 });
-                return;
+            } else {
+                throw new RuntimeException(err.get());
             }
+            return;
+        }
 
-            //开始校验：
-            for (Object obj : SongManager.songDetailsList) {
-                String songId = ((JSONObject) obj).getString("id");
-                if (exactlyDiff.containsKey(songId)) {
-                    continue;
-                }
-                Log.e("%s 's ex_diff not find", songId);
+        //开始校验：
+        for (Object obj : SongManager.songDetailsList) {
+            String songId = ((JSONObject) obj).getString("id");
+            if (exactlyDiff.containsKey(songId)) {
+                continue;
+            }
+            Log.e(SongManager.class.getName(),String.format("%s 's ex_diff not find", songId));
+            exactlyData.edit().remove("version").apply();
+            if (exitApp) {
                 Hooker.activity.runOnUiThread(() -> {
-                    Toast.makeText(Hooker.activity, "云端定数表校验失败\n请等待Arcaea Wiki更新最新的定数表", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Hooker.activity, "定数表校验失败\n已自动移除数据\n请等待ArcWiki更新定数表", Toast.LENGTH_SHORT).show();
                     Hooker.activity.finish();
                 });
-                return;
+            } else {
+                throw new RuntimeException(String.format("%s 's ex_diff not find", songId));
             }
+            return;
+        }
 
-            exactlyData.edit().putString("list", JSON.toJSONString(exactlyDiff)).putString("version", info.versionName).apply();
-            Log.i(SongManager.class.getName(), "loaded exactly diff from arcaea wiki");
-            Log.v(SongManager.class.getName(), String.format("exactlyDiff(online) dump:\nVersion:%s\nDump:%s", info.versionName, JSON.toJSONString(exactlyDiff)));
-            latch.countDown();
-        });
+        exactlyData.edit().putString("list", JSON.toJSONString(exactlyDiff)).putString("version", info.versionName).apply();
+        Log.i(SongManager.class.getName(), "loaded exactly diff from arcaea wiki");
+        Log.v(SongManager.class.getName(), String.format("exactlyDiff(online) dump:\nVersion:%s\nDump:%s", info.versionName, JSON.toJSONString(exactlyDiff)));
 
-        latch.await(); //阻塞程序，直到diff被加载
         Log.i(SongManager.class.getName(), "resource init success");
     }
 }

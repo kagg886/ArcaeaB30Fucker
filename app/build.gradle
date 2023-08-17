@@ -13,8 +13,8 @@ android {
         applicationId "com.kagg886.fuck_arc_b30"
         minSdk 28
         targetSdk 32
-        versionCode 3
-        versionName "V1.1.1-pre1"
+        versionCode 4
+        versionName "V1.1.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

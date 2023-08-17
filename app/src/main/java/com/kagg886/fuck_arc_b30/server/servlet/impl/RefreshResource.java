@@ -33,7 +33,7 @@ public class RefreshResource extends AbstractServlet {
             if (Boolean.parseBoolean(ex_boolean)) {
                 Hooker.activity.getSharedPreferences("arc_b30_fucker_exactly_data", Context.MODE_PRIVATE).edit().remove("version").apply();
             }
-            SongManager.init();
+            SongManager.init(false);
             response.send(JSON.toJSONString(Result.OK()));
             return;
         }

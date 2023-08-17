@@ -41,7 +41,7 @@ public class Hooker implements IXposedHookLoadPackage {
                     logBase = activity.getCacheDir().toPath().resolve("server.log").toFile();
 
                     //init Resources
-                    SongManager.init();
+                    SongManager.init(true);
 
                     //start HTTPServer
                     HttpServer.getInstance().addRoute(RefreshResource.INSTANCE);
