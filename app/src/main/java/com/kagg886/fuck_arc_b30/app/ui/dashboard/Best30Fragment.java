@@ -1,4 +1,4 @@
-package com.kagg886.fuck_arc_b30.ui.dashboard;
+package com.kagg886.fuck_arc_b30.app.ui.dashboard;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
@@ -13,12 +13,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.kagg886.fuck_arc_b30.MainActivity;
+import com.kagg886.fuck_arc_b30.app.CrashHandler;
 import com.kagg886.fuck_arc_b30.R;
 import com.kagg886.fuck_arc_b30.databinding.FragmentBest30Binding;
 import com.kagg886.fuck_arc_b30.server.model.Best30Model;
@@ -54,12 +53,13 @@ public class Best30Fragment extends Fragment {
 
                 if (arr == null) {
                     Log.e(getClass().getName(),"B30 fetch failed!,response:" + body);
-                    ((MainActivity) getActivity()).navigateTo(R.id.navigation_home);
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    AlertDialog.Builder builder = new AlertDialog.Builder(CrashHandler.getCurrentActivity());
                     builder.setTitle("b30拉取失败");
                     builder.setMessage("拉取body如下:\n" + body + "\n截图前往github提交issue！");
-                    getActivity().runOnUiThread(builder::show);
-                    ((MainActivity) getActivity()).navigateTo(R.id.navigation_home);
+                    CrashHandler.getCurrentActivity().runOnUiThread(() -> {
+                        builder.show();
+                        CrashHandler.getCurrentActivity().navigateTo(R.id.navigation_home);
+                    });
                     return;
                 }
                 List<Best30Model> models = new ArrayList<>();
@@ -76,7 +76,7 @@ public class Best30Fragment extends Fragment {
                     models.add(best30Model);
                 });
                 for (Best30Model model : models) {
-                    getActivity().runOnUiThread(() -> {
+                    CrashHandler.getCurrentActivity().runOnUiThread(() -> {
                         try {
                             addB30Model(model);
                         } catch (Exception e) {
@@ -111,14 +111,14 @@ public class Best30Fragment extends Fragment {
                 }
 
                 Bitmap ratingImg = IOUtil.loadArcaeaResource("img/rating_" + ratingType + ".png");
-                getActivity().runOnUiThread(() -> {
+                CrashHandler.getCurrentActivity().runOnUiThread(() -> {
                     binding.fragmentB30Ptt.setText(String.format("%.2f",b30Avt));
                     binding.fragmentB30Bg.setBackground(new BitmapDrawable(getResources(),ratingImg));
                 });
             } catch (IOException e) {
-                getActivity().runOnUiThread(() -> {
-                    Toast.makeText(getContext(), "B30拉取失败，请检查服务端存活状态", Toast.LENGTH_SHORT).show();
-                    ((MainActivity) getActivity()).navigateTo(R.id.navigation_home);
+                CrashHandler.getCurrentActivity().runOnUiThread(() -> {
+                    Toast.makeText(CrashHandler.getCurrentActivity(), "B30拉取失败，请检查服务端存活状态", Toast.LENGTH_SHORT).show();
+                    CrashHandler.getCurrentActivity().navigateTo(R.id.navigation_home);
                 });
 
             }
@@ -136,11 +136,11 @@ public class Best30Fragment extends Fragment {
     @SuppressLint("DefaultLocale")
     private void addB30Model(Best30Model best30Model) {
         SingleSongData data = best30Model.getData();
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.card_b30, null);
+        View view = LayoutInflater.from(CrashHandler.getCurrentActivity()).inflate(R.layout.card_b30, null);
         view.setId(View.generateViewId());
 
         view.setOnClickListener((v) -> {
-            new AlertDialog.Builder(getActivity()).setTitle("DebugWindow")
+            new AlertDialog.Builder(CrashHandler.getCurrentActivity()).setTitle("DebugWindow")
                     .setMessage(JSON.toJSONString(best30Model)).show();
         });
 
@@ -211,15 +211,15 @@ public class Best30Fragment extends Fragment {
                 clearTypeImg = IOUtil.loadArcaeaResource("img/clear_type/" + clearType + ".png");
                 scoreTypeImg = IOUtil.loadArcaeaResource("img/grade/mini/" + scoreType + ".png");
 
-                getActivity().runOnUiThread(() -> {
+                CrashHandler.getCurrentActivity().runOnUiThread(() -> {
                     b30SongImg.setImageBitmap(songImg);
                     b30ClearType.setImageBitmap(clearTypeImg);
                     b30ScoreType.setImageBitmap(scoreTypeImg);
                 });
             } catch (IOException e) {
-                getActivity().runOnUiThread(() -> {
-                    Toast.makeText(getContext(), "B30图片加载失败，请检查服务端存活状态", Toast.LENGTH_SHORT).show();
-                    ((MainActivity) getActivity()).navigateTo(R.id.navigation_home);
+                CrashHandler.getCurrentActivity().runOnUiThread(() -> {
+                    Toast.makeText(CrashHandler.getCurrentActivity(), "B30图片加载失败，请检查服务端存活状态", Toast.LENGTH_SHORT).show();
+                    CrashHandler.getCurrentActivity().navigateTo(R.id.navigation_home);
                 });
 
             }

@@ -5,7 +5,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
-import com.kagg886.fuck_arc_b30.res.SongManager;
+import com.kagg886.fuck_arc_b30.server.res.SongManager;
 import com.kagg886.fuck_arc_b30.server.HttpServer;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.*;
 import com.kagg886.fuck_arc_b30.util.Utils;

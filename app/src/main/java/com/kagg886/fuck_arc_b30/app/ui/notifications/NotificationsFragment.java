@@ -1,4 +1,4 @@
-package com.kagg886.fuck_arc_b30.ui.notifications;
+package com.kagg886.fuck_arc_b30.app.ui.notifications;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

@@ -1,20 +1,12 @@
 package com.kagg886.fuck_arc_b30.server.servlet.impl;
 
-import android.util.Log;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.kagg886.fuck_arc_b30.Hooker;
-import com.kagg886.fuck_arc_b30.res.SongManager;
+import com.kagg886.fuck_arc_b30.server.res.SongManager;
 import com.kagg886.fuck_arc_b30.server.model.Result;
 import com.kagg886.fuck_arc_b30.server.servlet.AbstractServlet;
-import com.kagg886.fuck_arc_b30.util.IOUtil;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
-
-import java.io.IOException;
-import java.util.Optional;
-
-import static com.kagg886.fuck_arc_b30.res.SongManager.songDetailsList;
 
 /**
  * 根据songid获取歌曲详细信息

@@ -295,6 +295,12 @@
    
      GET /res/refreshResource
    
+     **query参数**
+   
+     | Key                 | Description                                                  |
+     | ------------------- | ------------------------------------------------------------ |
+     | forceRefreshEx_diff | 是否强制刷新`准确定数`资源。固定值，即true/false。默认值为false |
+   
      **返回示例**
    
      ```json

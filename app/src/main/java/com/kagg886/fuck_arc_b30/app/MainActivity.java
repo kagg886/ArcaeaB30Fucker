@@ -1,4 +1,4 @@
-package com.kagg886.fuck_arc_b30;
+package com.kagg886.fuck_arc_b30.app;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -16,6 +16,8 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.kagg886.fuck_arc_b30.BuildConfig;
+import com.kagg886.fuck_arc_b30.R;
 import com.kagg886.fuck_arc_b30.databinding.ActivityMain2Binding;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.DumpLog;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.Version;

@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.util.Log;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
-import com.kagg886.fuck_arc_b30.res.SongManager;
+import com.kagg886.fuck_arc_b30.server.res.SongManager;
 import com.kagg886.fuck_arc_b30.server.model.Best30Model;
 import com.kagg886.fuck_arc_b30.server.model.Result;
 import com.kagg886.fuck_arc_b30.server.servlet.AbstractServlet;

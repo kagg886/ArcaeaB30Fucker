@@ -11,6 +11,11 @@
                 app:title="模拟崩溃">
         </Preference>
 
+        <Preference
+                android:key="setting_remote_resource_refresh"
+                app:summary="点击后会刷新后端资源，需要连接到后端才能使用"
+                app:title="刷新远程资源">
+        </Preference>
 
         <Preference
                 android:key="setting_clean_cache"

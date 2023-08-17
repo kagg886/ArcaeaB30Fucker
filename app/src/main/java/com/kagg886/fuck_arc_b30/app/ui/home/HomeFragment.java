@@ -1,4 +1,4 @@
-package com.kagg886.fuck_arc_b30.ui.home;
+package com.kagg886.fuck_arc_b30.app.ui.home;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import com.kagg886.fuck_arc_b30.app.CrashHandler;
 import com.kagg886.fuck_arc_b30.R;
 import com.kagg886.fuck_arc_b30.databinding.FragmentHomeBinding;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.Version;
@@ -72,10 +73,10 @@ public class HomeFragment extends Fragment {
             try {
                 Version.AppVersionInfo info = IOUtil.fetch(Version.INSTANCE, Version.AppVersionInfo.class);
                 mHandler.sendEmptyMessage(STATUS_LOADING_SUCCESS);
-                getActivity().runOnUiThread(() -> binding.fragmentHomeMessage.setText(String.format("Server Version:\nName:%s\nCode:%d", info.getVersionName(), info.getVersionCode())));
+                CrashHandler.getCurrentActivity().runOnUiThread(() -> binding.fragmentHomeMessage.setText(String.format("Server Version:\nName:%s\nCode:%d", info.getVersionName(), info.getVersionCode())));
             } catch (IOException e) {
                 mHandler.sendEmptyMessage(STATUS_LOADING_FAILED);
-                getActivity().runOnUiThread(() -> binding.fragmentHomeMessage.setText(e.getMessage() + "\n触摸emoji以重试"));
+                CrashHandler.getCurrentActivity().runOnUiThread(() -> binding.fragmentHomeMessage.setText(e.getMessage() + "\n触摸emoji以重试"));
             }
             isRefreshing = false;
         }).start();

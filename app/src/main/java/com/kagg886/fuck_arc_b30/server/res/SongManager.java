@@ -1,4 +1,4 @@
-package com.kagg886.fuck_arc_b30.res;
+package com.kagg886.fuck_arc_b30.server.res;
 
 
 import android.content.Context;
@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import android.widget.Toast;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -17,12 +18,11 @@ import com.kagg886.fuck_arc_b30.util.IOUtil;
 import com.kagg886.fuck_arc_b30.util.Utils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +32,16 @@ import java.util.stream.Collectors;
  * @date 2023/8/13 18:31
  **/
 public class SongManager {
+    //排除id，如愚人节曲目
+    private static List<String> excludeSongId = new ArrayList<>() {{
+        add("overdead");
+        add("redandblueandgreen");
+        add("ignotusafterburn");
+        add("singularityvvvip");
+        add("mismal");
+        add("ifirmx");
+    }};
+
     //歌曲的信息
     public static JSONArray songDetailsList;
     //玩家的成绩
@@ -50,9 +60,7 @@ public class SongManager {
         return scoreData.stream().filter(songs -> songs.getId().equals(id)).collect(Collectors.toList());
     }
 
-
-    public static void init() throws InterruptedException {
-        //初始化曲目详情
+    private static void loadSongList() {
         try {
             String source = IOUtil.loadStringFromStream(Hooker.activity.getAssets().open("songs/songlist"));
             songDetailsList = JSON.parseObject(source).getJSONArray("songs");
@@ -61,14 +69,18 @@ public class SongManager {
         } catch (IOException e) {
             Log.e(SongManager.class.getName(), "Load Song List Failed!", e);
         }
+    }
 
-        //初始化歌曲成绩
+    private static void loadScoreData() {
         try (SQLiteDatabase sqlite = SQLiteDatabase.openDatabase(Hooker.activity.getFilesDir() + "/st3", null, SQLiteDatabase.OPEN_READONLY)) {
             HashMap<String, Integer> clearTypes = new HashMap<>();
             //获得通关状态
             Cursor cursor = sqlite.rawQuery("select * from cleartypes", null);
             if (cursor.moveToFirst()) {
                 do {
+                    if (excludeSongId.contains(cursor.getString(1))) {
+                        continue;
+                    }
                     //同一id可能有不同难度
                     clearTypes.put(cursor.getString(1) + "_" + cursor.getString(2), cursor.getInt(3));
                     //id --> 0
@@ -102,6 +114,9 @@ public class SongManager {
                 String id;
                 do {
                     id = cursor.getString(8);
+                    if (excludeSongId.contains(id)) {
+                        continue;
+                    }
                     scoreData.add(new SingleSongData(
                             id,
                             cursor.getInt(2),
@@ -116,12 +131,21 @@ public class SongManager {
                 } while (cursor.moveToNext());
             }
             cursor.close();
+
             Log.i(SongManager.class.getName(), "load playerData successful");
             Log.v(SongManager.class.getName(), "scoreData dump:" + scoreData);
             Log.v(SongManager.class.getName(), "clearTypesOrigin dump:" + clearTypes);
         } catch (Exception e) {
             Log.e(SongManager.class.getName(), "Failed to load PlayerData", e);
         }
+    }
+
+
+    public static void init() throws InterruptedException {
+        //初始化曲目详情
+        loadSongList();
+        //初始化歌曲成绩
+        loadScoreData();
 
         CountDownLatch latch = new CountDownLatch(1);
         Utils.runUntilNoError(() -> {
@@ -133,7 +157,7 @@ public class SongManager {
                 if (info.versionName.equals(dataVersion)) {
                     exactlyDiff = JSON.parseObject(exactlyData.getString("list", null), HashMap.class);
                     Log.i(SongManager.class.getName(), "loaded exactly diff from cache");
-                    Log.v(SongManager.class.getName(), String.format("exactlyDiff(offline) dump:\nVersion:%s\nDump:%s",dataVersion,exactlyDiff.toString()));
+                    Log.v(SongManager.class.getName(), String.format("exactlyDiff(offline) dump:\nVersion:%s\nDump:%s", dataVersion, exactlyDiff.toString()));
                     latch.countDown();
                     return;
                 }
@@ -142,55 +166,62 @@ public class SongManager {
             }
 
             //初始化定数详单
-            Document dom;
+            JSONObject ex_diff_online = null;
+            AtomicReference<String> errSongId = new AtomicReference<>();
             try {
-                dom = Jsoup.connect("https://wiki.arcaea.cn/%E5%AE%9A%E6%95%B0%E8%AF%A6%E8%A1%A8").get();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                Document dom = Jsoup.connect("https://wiki.arcaea.cn/index.php?title=Template:ChartConstant.json&action=edit").get();
+                ex_diff_online = JSON.parseObject(dom.getElementById("wpTextbox1").text());
+                //unit:
+//                "alexandrite": [
+//                    {
+//                        "constant": 4.5,
+//                            "old": false
+//                    },
+//                    {
+//                        "constant": 7,
+//                            "old": false
+//                    },
+//                    {
+//                        "constant": 10,
+//                        "old": false
+//                    }
+//                ],
+
+                ex_diff_online.forEach((id, value1) -> {
+                    errSongId.set(id);
+                    double[] value = ((JSONArray) value1)
+                            .stream()
+                            .mapToDouble((v) -> v == null ? -1 : ((JSONObject) v).getDoubleValue("constant")
+                            )
+                            .toArray();
+                    exactlyDiff.put(id, value);
+                });
+            } catch (Exception e) {
+                Log.e(SongManager.class.getName(), "fetch ex_diff_online error: " + errSongId.get() + "->" + ex_diff_online.get(errSongId.get()).toString());
+                Hooker.activity.runOnUiThread(() -> {
+                    Toast.makeText(Hooker.activity, "在线定数表拉取失败，请尝试重新启动Arcaea!", Toast.LENGTH_SHORT).show();
+                    Hooker.activity.finish();
+                });
+                return;
             }
-            Elements elements = dom.getElementsByTag("tbody").get(0).getElementsByTag("tr");
-            for (Element element : elements) {
-                if (element.getElementsByTag("th").size() != 0) {
+
+            //开始校验：
+            for (Object obj : SongManager.songDetailsList) {
+                String songId = ((JSONObject) obj).getString("id");
+                if (exactlyDiff.containsKey(songId)) {
                     continue;
                 }
-                Elements td = element.getElementsByTag("td");
-                String name = td.get(0).text();
-                double pst = td.get(1).text().contains("-") ? -1 : Double.parseDouble(td.get(1).text()); //Last Moment只有byd9
-                double prs = td.get(2).text().contains("-") ? -1 : Double.parseDouble(td.get(2).text());
-                double ftr = td.get(3).text().contains("-") ? -1 : Double.parseDouble(td.get(3).text());
-                double byd = td.get(4).text().isBlank() ? -1 : Double.parseDouble(td.get(4).text());
-
-                if (byd != -1 && name.equals("Quon")) { //因为Quon的名字有2个
-                    name = "quonwacca";
-                } else if (ftr == 9.9 && name.equals("Genesis")) {
-                    name = "genesischunithm";
-                } else {
-                    String finalName = name;
-                    JSONObject object;
-                    try {
-                        object = songDetailsList.stream().map((v) -> (JSONObject) v)
-                                .filter((v) -> v.getJSONObject("title_localized")
-                                        .getString("en")
-                                        .equals(finalName)
-                                ).findFirst()
-                                .orElse(null);
-                        if (object == null) {
-                            throw new NullPointerException();
-                        }
-                    } catch (Exception e) {
-                        Log.d(SongManager.class.getName(), "An error was founded when we find the id: '" + name + "' ", e);
-                        continue;
-                    }
-                    name = object.getString("id");
-                }
-                exactlyDiff.put(name, new double[]{pst, prs, ftr, byd});
+                Log.e("%s 's ex_diff not find", songId);
+                Hooker.activity.runOnUiThread(() -> {
+                    Toast.makeText(Hooker.activity, "云端定数表校验失败\n请等待Arcaea Wiki更新最新的定数表", Toast.LENGTH_SHORT).show();
+                    Hooker.activity.finish();
+                });
+                return;
             }
-            exactlyDiff.put("ii", new double[]{5.0, 8.4, 10.8, -1}); //好像wiki上的ii和arc内部文件的ii拼写不一样
 
-            exactlyData.edit().putString("version", info.versionName).putString("list", JSON.toJSONString(exactlyDiff)).apply();
-            //理想层面此值应该比内部文件的歌曲详情少两份，因为那两份是新手教程
+            exactlyData.edit().putString("list", JSON.toJSONString(exactlyDiff)).putString("version", info.versionName).apply();
             Log.i(SongManager.class.getName(), "loaded exactly diff from arcaea wiki");
-            Log.v(SongManager.class.getName(), String.format("exactlyDiff(online) dump:\nVersion:%s\nDump:%s",info.versionName,JSON.toJSONString(exactlyDiff)));
+            Log.v(SongManager.class.getName(), String.format("exactlyDiff(online) dump:\nVersion:%s\nDump:%s", info.versionName, JSON.toJSONString(exactlyDiff)));
             latch.countDown();
         });
 
