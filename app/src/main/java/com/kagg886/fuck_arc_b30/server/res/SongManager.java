@@ -213,13 +213,17 @@ public class SongManager {
             return false;
         }
 
+        List<String> missingEx_DiffList = new ArrayList<>();
         //开始校验：
         for (Object obj : SongManager.songDetailsList) {
             String songId = ((JSONObject) obj).getString("id");
-            if (exactlyDiff.containsKey(songId)) {
-                continue;
+            if (!exactlyDiff.containsKey(songId)) {
+                missingEx_DiffList.add(songId);
             }
-            Log.e(SongManager.class.getName(),String.format("%s 's ex_diff not find", songId));
+        }
+
+        if (missingEx_DiffList.size() != 0) {
+            Log.e(SongManager.class.getName(),String.format("%s 's ex_diff not find", missingEx_DiffList));
             exactlyData.edit().remove("version").apply();
             if (exitApp) {
                 Hooker.activity.runOnUiThread(() -> {
@@ -227,7 +231,7 @@ public class SongManager {
                     Hooker.activity.finish();
                 });
             } else {
-                throw new RuntimeException(String.format("%s 's ex_diff not find", songId));
+                throw new RuntimeException(String.format("%s 's ex_diff not find", missingEx_DiffList));
             }
             return false;
         }
