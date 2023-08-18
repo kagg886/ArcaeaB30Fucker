@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -145,7 +146,7 @@ public class SongManager {
         init(false);
     }
 
-    public static void init(boolean exitApp) {
+    public static boolean init(boolean exitApp) {
         //初始化曲目详情
         loadSongList();
         //初始化歌曲成绩
@@ -161,7 +162,7 @@ public class SongManager {
                 Log.i(SongManager.class.getName(), "loaded exactly diff from cache");
                 Log.v(SongManager.class.getName(), String.format("exactlyDiff(offline) dump:\nVersion:%s\nDump:%s", dataVersion, exactlyDiff.toString()));
                 Log.i(SongManager.class.getName(), "resource init success");
-                return;
+                return true;
             }
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(e);
@@ -174,7 +175,7 @@ public class SongManager {
         CountDownLatch latch = new CountDownLatch(1);
 
         Utils.runAsync(() -> {
-            JSONObject ex_diff_online = null;
+            JSONObject ex_diff_online;
             try {
                 Document dom = Jsoup.connect("https://wiki.arcaea.cn/index.php?title=Template:ChartConstant.json&action=edit").get();
                 ex_diff_online = JSON.parseObject(dom.getElementById("wpTextbox1").text());
@@ -189,7 +190,7 @@ public class SongManager {
                 });
             } catch (Exception e) {
                 err.set(e);
-                Log.e(SongManager.class.getName(), "fetch ex_diff_online error: " + errSongId.get() + "->" + ex_diff_online.get(errSongId.get()).toString());
+                Log.e(SongManager.class.getName(), "fetch ex_diff_online error: " + errSongId.get(),e);
             }
             latch.countDown();
         });
@@ -209,7 +210,7 @@ public class SongManager {
             } else {
                 throw new RuntimeException(err.get());
             }
-            return;
+            return false;
         }
 
         //开始校验：
@@ -222,13 +223,13 @@ public class SongManager {
             exactlyData.edit().remove("version").apply();
             if (exitApp) {
                 Hooker.activity.runOnUiThread(() -> {
-                    Toast.makeText(Hooker.activity, "定数表校验失败\n已自动移除数据\n请等待ArcWiki更新定数表", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Hooker.activity, "定数详表校验失败\n等待ArcWiki更新", Toast.LENGTH_SHORT).show();
                     Hooker.activity.finish();
                 });
             } else {
                 throw new RuntimeException(String.format("%s 's ex_diff not find", songId));
             }
-            return;
+            return false;
         }
 
         exactlyData.edit().putString("list", JSON.toJSONString(exactlyDiff)).putString("version", info.versionName).apply();
@@ -236,5 +237,6 @@ public class SongManager {
         Log.v(SongManager.class.getName(), String.format("exactlyDiff(online) dump:\nVersion:%s\nDump:%s", info.versionName, JSON.toJSONString(exactlyDiff)));
 
         Log.i(SongManager.class.getName(), "resource init success");
+        return true;
     }
 }

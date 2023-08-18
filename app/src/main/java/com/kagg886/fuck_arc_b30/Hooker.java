@@ -41,21 +41,21 @@ public class Hooker implements IXposedHookLoadPackage {
                     logBase = activity.getCacheDir().toPath().resolve("server.log").toFile();
 
                     //init Resources
-                    SongManager.init(true);
+                    if (SongManager.init(true)) {
+                        //start HTTPServer
+                        HttpServer.getInstance().addRoute(RefreshResource.INSTANCE);
+                        HttpServer.getInstance().addRoute(Version.INSTANCE);
+                        HttpServer.getInstance().addRoute(GetSongInfoById.INSTANCE);
+                        HttpServer.getInstance().addRoute(GetPlayerDataById.INSTANCE);
+                        HttpServer.getInstance().addRoute(Image.INSTANCE);
+                        HttpServer.getInstance().addRoute(Best30.INSTANCE);
+                        HttpServer.getInstance().addRoute(AssetsGet.INSTANCE);
+                        HttpServer.getInstance().addRoute(DumpLog.INSTANCE);
 
-                    //start HTTPServer
-                    HttpServer.getInstance().addRoute(RefreshResource.INSTANCE);
-                    HttpServer.getInstance().addRoute(Version.INSTANCE);
-                    HttpServer.getInstance().addRoute(GetSongInfoById.INSTANCE);
-                    HttpServer.getInstance().addRoute(GetPlayerDataById.INSTANCE);
-                    HttpServer.getInstance().addRoute(Image.INSTANCE);
-                    HttpServer.getInstance().addRoute(Best30.INSTANCE);
-                    HttpServer.getInstance().addRoute(AssetsGet.INSTANCE);
-                    HttpServer.getInstance().addRoute(DumpLog.INSTANCE);
+                        HttpServer.getInstance().startServer(61616);
 
-                    HttpServer.getInstance().startServer(61616);
-
-                    activity.runOnUiThread(() -> Toast.makeText(activity, "Arcaea B30 Server Started!", Toast.LENGTH_SHORT).show());
+                        activity.runOnUiThread(() -> Toast.makeText(activity, "Arcaea B30 Server Started!", Toast.LENGTH_SHORT).show());
+                    }
                 }
             });
         } catch (ClassNotFoundException ignored) {

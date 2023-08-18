@@ -86,9 +86,6 @@ public class Best30Fragment extends Fragment {
 //                    break; //只运行一个的测试
                 }
 
-                models.stream().forEach((v) -> {
-                    Log.d("B30i",String.format("%.2f",v.getPtt()));
-                });
                 double b30Avt = models.stream().mapToDouble(Best30Model::getPtt).sum() / 30; //b30的ptt
                 int ratingType;
 
