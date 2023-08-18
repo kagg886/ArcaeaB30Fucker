@@ -16,13 +16,14 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.kagg886.fuck_arc_b30.BuildConfig;
 import com.kagg886.fuck_arc_b30.R;
 import com.kagg886.fuck_arc_b30.databinding.ActivityMain2Binding;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.DumpLog;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.Version;
+import com.kagg886.fuck_arc_b30.util.ArcaeaNativeTool;
 import com.kagg886.fuck_arc_b30.util.IOUtil;
 import com.kagg886.fuck_arc_b30.util.Utils;
+import com.koushikdutta.async.BuildConfig;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
 
         ActivityMain2Binding binding = ActivityMain2Binding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        Toast.makeText(this, String.valueOf(ArcaeaNativeTool.nativeGetPtt()), Toast.LENGTH_SHORT).show();
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
