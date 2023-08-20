@@ -1,2 +1,5 @@
-package xyz.cnyg.memoryreader.procfs;public class Path {
+package xyz.cnyg.memoryreader.procfs;
+
+public class Path {
+    public static final String FsPath = "/proc/self";
 }

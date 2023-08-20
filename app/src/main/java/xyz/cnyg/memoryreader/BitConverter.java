@@ -3,7 +3,7 @@ package xyz.cnyg.memoryreader;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 
-public class BitConvert {
+public class BitConverter {
     /**
      * 以字节数组的形式返回指定的布尔值
      * @param data 一个布尔值

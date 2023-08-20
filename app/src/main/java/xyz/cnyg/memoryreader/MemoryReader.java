@@ -1,103 +1,109 @@
-package xyz.cnyg.memoryreader.procfs;
+package xyz.cnyg.memoryreader;
 
 import android.util.Log;
-import android.view.MotionEvent;
 
 import com.kagg886.fuck_arc_b30.util.NativeMethod;
 import com.kagg886.fuck_arc_b30.util.Utils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.RandomAccessFile;
+import java.lang.annotation.Native;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
-public class ProcfsReader {
+import kotlin.internal.IntrinsicConstEvaluation;
+import xyz.cnyg.memoryreader.procfs.Maps;
+import xyz.cnyg.memoryreader.procfs.MemoryMap;
+
+public class MemoryReader {
     public static final String ProcFsPath = "/proc/"+String.valueOf(android.os.Process.myPid());
 
-    public static class Mem{
-        public static byte ReadByte(long Address){
-            byte[] data = ReadBytes(Address,1);
-            if(data == null) return 0;
-            return data[0];
+    public static byte ReadByte(long Address){
+        byte[] data = ReadBytes(Address,1);
+        if(data == null) return 0;
+        return data[0];
 
-        }
-        public static short ReadInt16(long Address){
-            byte[] data = ReadBytes(Address,2);
-            if(data == null) return 0;
-            return ByteBuffer.wrap(data).getShort();
-        }
-        public static int ReadInt32(long Address){
-            byte[] data = ReadBytes(Address,4);
-            if(data == null) return 0;
-            return ByteBuffer.wrap(data).getInt();
-        }
-        public static long ReadInt64(long Address){
-            byte[] data = ReadBytes(Address,8);
-            if(data == null) return 0;
-            return ByteBuffer.wrap(data).getLong();
-        }
-        public static float ReadFloat(long Address){
-            byte[] data = ReadBytes(Address,4);
-            if(data == null) return 0.0f;
-            return ByteBuffer.wrap(data).getFloat();
-        }
-        public static double ReadDouble(long Address){
-            byte[] data = ReadBytes(Address,8);
-            if(data == null) return 0.0f;
-            return ByteBuffer.wrap(data).getDouble();
-        }
-        public static byte[] ReadBytes(long Address,int size){
-            String memPath = ProcFsPath + "/mem";
-            File memEntry = new File(memPath);
-            memEntry.setReadOnly();
-            try{
-                return NativeMethod.ReadMemory(Address,size);
-            }
-            catch(Exception ex){
-                Utils.runAsync(()->{ Log.e("Read","Reading mem is thrown" + ex.getMessage()); });
-                return null;
-            }
-            //return null;
-        }
-        public static long GetByteDataStartAddress(long StartPos,byte[] search){
-            return GetByteDataStartAddress(StartPos,search,Maps.StackEnd());
-        }
-        // TODO: 处理野指针问题
-        // 还是根据 Maps 方案，找到所有可以进行读的内存块，然后避免读取不可访问的指针位置即可
-        // 需要解析一下 maps 文件以知道哪片区域可读
-        public static long GetByteDataStartAddress(long StartPos,byte[] search,long EndPos){
-            String TAG = "GetHitCodeBase";
-            int bufferSize = 1024;
-            int searchTargetLen = search.length;
-            int outputSet = 0x0;
-            for(long pointer=StartPos;pointer<EndPos;pointer+=bufferSize){
-                long outputDep = pointer / 0x100000;
-                if(outputSet != (int)outputDep){
-                    Log.i("ADDRSE","Search Stage="+Long.toHexString(outputDep));
-                    outputSet = (int)outputDep;
-                }
-                byte[] Read = ReadBytes(StartPos,bufferSize);
-                int searchPos = NativeMethod.StringIndexOf(Read,search);
-                if(searchPos > -1) Log.i("ADDRSE","FindMatchPos:"+Integer.toHexString(searchPos));
-                if(searchPos < 0){
-                    if(pointer - searchTargetLen < StartPos){
-                        continue; //开始就回去?不可能！
-                    }
-                    //截取块中断，防止刚好中断就找不到
-                    byte[] MidCutBlocks = ReadBytes( pointer + bufferSize - searchTargetLen,searchTargetLen * 2);
-                    int nextSearchPos = NativeMethod.StringIndexOf(MidCutBlocks,search);
-                    if(nextSearchPos < 0){
-                        continue; //截断块没有,继续!
-                    }
-                    return pointer + bufferSize - searchTargetLen + nextSearchPos;//找到了
-                }
-                else return pointer + searchPos; //在块内读到时直接返回
+    }
+    public static short ReadInt16(long Address){
+        byte[] data = ReadBytes(Address,2);
+        if(data == null) return 0;
+        return BitConverter.toShort(data);
+    }
+    public static int ReadInt32(long Address){
+        byte[] data = ReadBytes(Address,4);
+        if(data == null) return 0;
+        return BitConverter.toInt(data);
+    }
+    public static long ReadInt64(long Address){
+        byte[] data = ReadBytes(Address,8);
+        if(data == null) return 0;
+        return BitConverter.toLong(data);
+    }
+    public static float ReadFloat(long Address){
+        byte[] data = ReadBytes(Address,4);
+        if(data == null) return 0.0f;
+        return BitConverter.toFloat(data);
+    }
+    public static double ReadDouble(long Address){
+        byte[] data = ReadBytes(Address,8);
+        if(data == null) return 0.0f;
+        return BitConverter.toDouble(data);
+    }
+    public static byte[] ReadBytes(long Address,int size){
+        return NativeMethod.ReadMemory(Address,size);
+    }
+    public static long GetByteDataStartAddress(long StartPos,byte[] search){
+        return GetByteDataStartAddress(StartPos,search, Maps.GetStackEndAddress());
+    }
 
+    // 返回搜索数据的起始地址
+    // 即使做了大量处理，但搜索时还是可能会发生崩溃
+    public static long GetByteDataStartAddress(long StartPos,byte[] search,long EndPos){
+        int buffSize = 2048;
+
+        long outputDepends = 0x0;
+        Boolean hitOutput = false;
+        for(long ptr = StartPos;ptr < EndPos;ptr += buffSize){
+            hitOutput = false;
+            int StartAddressReadableBytes = (int)Maps.AddressReadableSize(ptr,ptr+buffSize);
+            if(StartAddressReadableBytes < 1) continue; //如果区域不可读，直接跳过即可
+
+            /*outputDepends = ptr/0x100000;
+            if(outputDepends == ptr/0x100000){
+                Log.d("ADDRSE","Aim normal to:"+Long.toHexString(ptr));
+                Log.d("ADDRSE","Read len:"+ Integer.toString(StartAddressReadableBytes));
+                hitOutput = true;
+            }*/
+
+            byte[] data = NativeMethod.ReadMemory(ptr,StartAddressReadableBytes);
+            int Pos = NativeMethod.StringIndexOf(data,search);
+
+            /*if(hitOutput){
+                Log.d("ADDRSE","Finish data search in normal,Pos="+Integer.toString(Pos));
+            }*/
+
+            if(Pos < 0){//标准块找不到, 从截断块找
+                long nextPos = ptr + StartAddressReadableBytes - search.length;
+                long nextReadEndPos = nextPos + (search.length * 2);
+                int nextReadSize = (int)Maps.AddressReadableSize(nextPos,nextReadEndPos);
+                if(nextReadSize < 1) continue;
+
+                /*if(hitOutput){
+                    Log.d("ADDRSE","Aim midblock to:"+Long.toHexString(nextPos));
+                    Log.d("ADDRSE","ReadLen:"+Integer.toString(nextReadSize));
+                }*/
+
+                byte[] nextData = NativeMethod.ReadMemory(nextPos,nextReadSize);
+                int nextSPos = NativeMethod.StringIndexOf(nextData,search);
+
+                /*if(hitOutput){
+                    Log.d("ADDRSE","Finish data search in normal,Pos="+Integer.toString(nextSPos));
+                }*/
+
+                if(nextSPos < 0){ //还是找不到
+                    continue;
+                }
+                else return nextPos + nextSPos; //截断块找到的
             }
-            return 0x00;
+            else return ptr + Pos; //直接找到的
         }
+        return 0x0; //一直找不到的话
     }
 }
