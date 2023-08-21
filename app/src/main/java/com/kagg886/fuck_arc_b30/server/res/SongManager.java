@@ -3,13 +3,10 @@ package com.kagg886.fuck_arc_b30.server.res;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.widget.Toast;
-import androidx.appcompat.app.AlertDialog;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -47,7 +44,7 @@ public class SongManager {
     public static JSONArray songDetailsList;
     //玩家的成绩
     public static List<SingleSongData> scoreData = new ArrayList<>();
-
+    //确切定数表
     public static Map<String, Object> exactlyDiff = new HashMap<>();
 
     public static JSONObject findSongsById(String id) {
@@ -154,18 +151,13 @@ public class SongManager {
 
         SharedPreferences exactlyData = Hooker.activity.getSharedPreferences("arc_b30_fucker_exactly_data", Context.MODE_PRIVATE);
         String dataVersion = exactlyData.getString("version", null);
-        PackageInfo info;
-        try {
-            info = Hooker.activity.getPackageManager().getPackageInfo(Hooker.activity.getPackageName(), 0);
-            if (info.versionName.equals(dataVersion)) {
-                exactlyDiff = JSON.parseObject(exactlyData.getString("list", null), HashMap.class);
-                Log.i(SongManager.class.getName(), "loaded exactly diff from cache");
-                Log.v(SongManager.class.getName(), String.format("exactlyDiff(offline) dump:\nVersion:%s\nDump:%s", dataVersion, exactlyDiff.toString()));
-                Log.i(SongManager.class.getName(), "resource init success");
-                return true;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new RuntimeException(e);
+
+        if (UserManager.pkgInfo.versionName.equals(dataVersion)) {
+            exactlyDiff = JSON.parseObject(exactlyData.getString("list", null), HashMap.class);
+            Log.i(SongManager.class.getName(), "loaded exactly diff from cache");
+            Log.v(SongManager.class.getName(), String.format("exactlyDiff(offline) dump:\nVersion:%s\nDump:%s", dataVersion, exactlyDiff.toString()));
+            Log.i(SongManager.class.getName(), "resource init success");
+            return true;
         }
 
         //初始化定数详单
@@ -190,7 +182,7 @@ public class SongManager {
                 });
             } catch (Exception e) {
                 err.set(e);
-                Log.e(SongManager.class.getName(), "fetch ex_diff_online error: " + errSongId.get(),e);
+                Log.e(SongManager.class.getName(), "fetch ex_diff_online error: " + errSongId.get(), e);
             }
             latch.countDown();
         });
@@ -213,17 +205,13 @@ public class SongManager {
             return false;
         }
 
-        List<String> missingEx_DiffList = new ArrayList<>();
         //开始校验：
         for (Object obj : SongManager.songDetailsList) {
             String songId = ((JSONObject) obj).getString("id");
-            if (!exactlyDiff.containsKey(songId)) {
-                missingEx_DiffList.add(songId);
+            if (exactlyDiff.containsKey(songId)) {
+                continue;
             }
-        }
-
-        if (missingEx_DiffList.size() != 0) {
-            Log.e(SongManager.class.getName(),String.format("%s 's ex_diff not find", missingEx_DiffList));
+            Log.e(SongManager.class.getName(), String.format("%s 's ex_diff not find", songId));
             exactlyData.edit().remove("version").apply();
             if (exitApp) {
                 Hooker.activity.runOnUiThread(() -> {
@@ -231,14 +219,14 @@ public class SongManager {
                     Hooker.activity.finish();
                 });
             } else {
-                throw new RuntimeException(String.format("%s 's ex_diff not find", missingEx_DiffList));
+                throw new RuntimeException(String.format("%s 's ex_diff not find", songId));
             }
             return false;
         }
 
-        exactlyData.edit().putString("list", JSON.toJSONString(exactlyDiff)).putString("version", info.versionName).apply();
+        exactlyData.edit().putString("list", JSON.toJSONString(exactlyDiff)).putString("version", UserManager.pkgInfo.versionName).apply();
         Log.i(SongManager.class.getName(), "loaded exactly diff from arcaea wiki");
-        Log.v(SongManager.class.getName(), String.format("exactlyDiff(online) dump:\nVersion:%s\nDump:%s", info.versionName, JSON.toJSONString(exactlyDiff)));
+        Log.v(SongManager.class.getName(), String.format("exactlyDiff(online) dump:\nVersion:%s\nDump:%s", UserManager.pkgInfo.versionName, JSON.toJSONString(exactlyDiff)));
 
         Log.i(SongManager.class.getName(), "resource init success");
         return true;

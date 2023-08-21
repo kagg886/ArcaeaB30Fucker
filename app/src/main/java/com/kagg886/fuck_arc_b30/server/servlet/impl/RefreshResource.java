@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSON;
 import com.kagg886.fuck_arc_b30.Hooker;
 import com.kagg886.fuck_arc_b30.server.res.SongManager;
 import com.kagg886.fuck_arc_b30.server.model.Result;
+import com.kagg886.fuck_arc_b30.server.res.UserManager;
 import com.kagg886.fuck_arc_b30.server.servlet.AbstractServlet;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
@@ -33,11 +34,12 @@ public class RefreshResource extends AbstractServlet {
             if (Boolean.parseBoolean(ex_boolean)) {
                 Hooker.activity.getSharedPreferences("arc_b30_fucker_exactly_data", Context.MODE_PRIVATE).edit().remove("version").apply();
             }
+            UserManager.init();
             SongManager.init(false);
             response.send(JSON.toJSONString(Result.OK()));
             return;
         }
-        response.send(JSON.toJSONString(Result.PARAM_IS_ILLEGAL.apply("forceRefreshEx_diff",new String[] {"true","false"})));
+        response.send(JSON.toJSONString(Result.ERR_PARAM_IS_ILLEGAL.apply("forceRefreshEx_diff",new String[] {"true","false"})));
 
     }
 }

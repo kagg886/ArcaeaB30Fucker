@@ -34,6 +34,19 @@ public class Best30 extends AbstractServlet {
 
     @Override
     public void onRequest0(AsyncHttpServerRequest request, AsyncHttpServerResponse response) throws Throwable {
+
+        List<Best30Model> models;
+        try {
+            models = getB30Models();
+        } catch (Exception e) {
+            response.send(JSON.toJSONString(Result.ERR_ID_NOT_EXISTS.apply(e.getMessage())));
+            return;
+        }
+        response.send(JSON.toJSONString(Result.OK(models)));
+//        response.send(JSON.toJSONString(Result.OK(models)));
+    }
+
+    public static List<Best30Model> getB30Models() {
         List<Best30Model> models = new ArrayList<>();
 
         SongManager.scoreData.forEach((v) -> {
@@ -46,9 +59,8 @@ public class Best30 extends AbstractServlet {
                 try {
                     ex_diff = ((JSONArray) SongManager.exactlyDiff.get(id)).getDouble(v.getDifficulty().getDiff());
                 } catch (Exception p) {
-                    Log.e(getClass().getName(),"ex_diff:" + id + "not found!");
-                    response.send(JSON.toJSONString(Result.ERR_ID_NOT_EXISTS));
-                    return;
+                    Log.e(Best30.class.getName(),"ex_diff:" + id + "not found!");
+                    throw new IllegalStateException(id);
                 }
             }
             if (v.getScore() > 10_000_000) {
@@ -74,7 +86,6 @@ public class Best30 extends AbstractServlet {
         });
 
         models.sort((a, b) -> Double.compare(b.getPtt(), a.getPtt()));
-        response.send(JSON.toJSONString(Result.OK(models.subList(0,Math.min(30,models.size())))));
-//        response.send(JSON.toJSONString(Result.OK(models)));
+        return models.subList(0,Math.min(30,models.size()));
     }
 }

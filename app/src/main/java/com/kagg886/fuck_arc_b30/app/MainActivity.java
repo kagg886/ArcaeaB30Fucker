@@ -16,24 +16,28 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.kagg886.fuck_arc_b30.BuildConfig;
 import com.kagg886.fuck_arc_b30.R;
 import com.kagg886.fuck_arc_b30.databinding.ActivityMain2Binding;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.DumpLog;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.Version;
+import com.kagg886.fuck_arc_b30.util.ArcaeaMemReader;
 import com.kagg886.fuck_arc_b30.util.IOUtil;
 import com.kagg886.fuck_arc_b30.util.Utils;
+import com.koushikdutta.async.BuildConfig;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import xyz.cnyg.memoryreader.procfs.Maps;
 
 public class MainActivity extends AppCompatActivity {
     private NavController navController;
@@ -53,6 +57,18 @@ public class MainActivity extends AppCompatActivity {
 
         ActivityMain2Binding binding = ActivityMain2Binding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        //应该是以 Arcaea 进程身份读取，而不是以 app 进程
+        //Toast.makeText(this, String.valueOf(ArcaeaMemReader.Test()), Toast.LENGTH_SHORT).show();
+        var o = Maps.GetMemoryMap();
+
+        Log.i("LOCAL","MemMapSize="+Integer.toString(o.length));
+        for(int i=0;i<o.length;i++){
+            Log.i("LOCAL",
+                    "Addr="+Long.toHexString(o[i].StartAddress)+"-"+Long.toHexString(o[i].EndAddress)+"" +
+                    " - R="+o[i].Permission.Read +",W="+o[i].Permission.Write+
+                    " -> "+o[i].Module);
+        }
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
