@@ -22,8 +22,10 @@ import com.kagg886.fuck_arc_b30.R;
 import com.kagg886.fuck_arc_b30.databinding.FragmentBest30Binding;
 import com.kagg886.fuck_arc_b30.server.model.Best30Model;
 import com.kagg886.fuck_arc_b30.server.model.SingleSongData;
+import com.kagg886.fuck_arc_b30.server.model.UserProfile;
 import com.kagg886.fuck_arc_b30.server.servlet.AbstractServlet;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.Best30;
+import com.kagg886.fuck_arc_b30.server.servlet.impl.Profile;
 import com.kagg886.fuck_arc_b30.util.IOUtil;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -36,6 +38,7 @@ public class Best30Fragment extends Fragment {
 
     private FragmentBest30Binding binding;
 
+    @SuppressLint("DefaultLocale")
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
@@ -43,11 +46,15 @@ public class Best30Fragment extends Fragment {
 
         new Thread(() -> {
             try {
+                //get b30 body
                 String body = Jsoup.connect(IOUtil.base + Best30.INSTANCE.getPath())
                         .ignoreContentType(true)
                         .method(Best30.INSTANCE.getMethod() == AbstractServlet.Method.GET ? Connection.Method.GET : Connection.Method.POST)
                         .timeout(5000)
                         .execute().body();
+
+                //get user body
+                UserProfile profile = IOUtil.fetch(Profile.INSTANCE, UserProfile.class);
 
                 JSONArray arr = JSON.parseObject(body).getJSONArray("data");
 
@@ -86,7 +93,7 @@ public class Best30Fragment extends Fragment {
 //                    break; //只运行一个的测试
                 }
 
-                double b30Avt = models.stream().mapToDouble(Best30Model::getPtt).sum() / 30; //b30的ptt
+                double b30Avt = profile.getPttB30();
                 int ratingType;
 
                 if (b30Avt > 13.00) {
@@ -109,7 +116,11 @@ public class Best30Fragment extends Fragment {
 
                 Bitmap ratingImg = IOUtil.loadArcaeaResource("img/rating_" + ratingType + ".png");
                 CrashHandler.getCurrentActivity().runOnUiThread(() -> {
-                    binding.fragmentB30Ptt.setText(String.format("%.2f",b30Avt));
+                    binding.fragmentB30User.setText(profile.getName());
+                    binding.fragmentB30PttB30.setText(String.format("%.2f",profile.getPttB30()));
+                    binding.fragmentB30PttR10.setText(String.format("%.2f",profile.getPttR10()));
+                    binding.fragmentB30Ptt.setText(String.format("%.2f",profile.getPttReal()));
+
                     binding.fragmentB30Bg.setBackground(new BitmapDrawable(getResources(),ratingImg));
                 });
             } catch (IOException e) {

@@ -1,4 +1,4 @@
-package com.kagg886.fuck_arc_b30.util;
+package xyz.cnyg.memoryreader;
 
 public class NativeMethod {
     static {

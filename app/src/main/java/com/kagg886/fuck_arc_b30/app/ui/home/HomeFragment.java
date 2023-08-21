@@ -26,7 +26,9 @@ public class HomeFragment extends Fragment {
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {
-
+            if (binding == null) {
+                return;
+            }
             TextView emoji = binding.fragmentHomeLoading;
             TextView message = binding.fragmentHomeStatus;
             switch (msg.what) {

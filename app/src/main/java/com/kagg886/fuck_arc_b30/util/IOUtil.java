@@ -44,6 +44,7 @@ public class IOUtil {
                 .timeout(5000)
                 .execute()
                 .body();
+        Log.d(IOUtil.class.getName(),"fetch:" + url.getPath() + "'s result is:" + body);
         try {
             JSONObject json = JSON.parseObject(body);
             if (json.getIntValue("code") != Result.OK().getCode()) {

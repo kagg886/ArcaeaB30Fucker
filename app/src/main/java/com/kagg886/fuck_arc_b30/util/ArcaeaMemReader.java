@@ -3,6 +3,7 @@ package com.kagg886.fuck_arc_b30.util;
 import android.util.Log;
 
 import xyz.cnyg.memoryreader.MemoryReader;
+import xyz.cnyg.memoryreader.NativeMethod;
 import xyz.cnyg.memoryreader.procfs.Maps;
 import xyz.cnyg.memoryreader.procfs.MemoryMap;
 

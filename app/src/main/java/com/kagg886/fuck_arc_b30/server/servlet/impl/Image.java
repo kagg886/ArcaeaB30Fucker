@@ -62,7 +62,7 @@ public class Image extends AbstractServlet {
                     }
                     songName = String.valueOf(d);
                 } catch (Exception e) {
-                    response.send(JSON.toJSONString(Result.PARAM_IS_ILLEGAL.apply("difficulty", Utils.newStringArray("0", "1", "2", "3", "PAST", "PRESENT", "FUTURE", "BEYOND"))));
+                    response.send(JSON.toJSONString(Result.ERR_PARAM_IS_ILLEGAL.apply("difficulty", Utils.newStringArray("0", "1", "2", "3", "PAST", "PRESENT", "FUTURE", "BEYOND"))));
                     return;
                 }
             }
@@ -81,7 +81,7 @@ public class Image extends AbstractServlet {
                 size = "_256";
                 break;
             default:
-                response.send(JSON.toJSONString(Result.PARAM_IS_ILLEGAL.apply("size", Utils.newStringArray("512", "256"))));
+                response.send(JSON.toJSONString(Result.ERR_PARAM_IS_ILLEGAL.apply("size", Utils.newStringArray("512", "256"))));
                 return;
         }
 

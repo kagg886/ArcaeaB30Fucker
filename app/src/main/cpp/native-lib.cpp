@@ -7,7 +7,7 @@ using namespace std;
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_kagg886_fuck_1arc_1b30_util_NativeMethod_StringIndexOf(JNIEnv *env, jclass clazz,
+Java_xyz_cnyg_memoryreader_NativeMethod_StringIndexOf(JNIEnv *env, jclass clazz,
                                                                 jbyteArray jbr_string,
                                                                 jbyteArray jbr_search) {
     // TODO: 完成实际的排序算法
@@ -35,7 +35,7 @@ Java_com_kagg886_fuck_1arc_1b30_util_NativeMethod_StringIndexOf(JNIEnv *env, jcl
 }
 extern "C"
 JNIEXPORT jbyteArray JNICALL
-Java_com_kagg886_fuck_1arc_1b30_util_NativeMethod_ReadMemory(JNIEnv *env, jclass clazz,
+Java_xyz_cnyg_memoryreader_NativeMethod_ReadMemory(JNIEnv *env, jclass clazz,
                                                              jlong address, jint size) {
     char buffer[size];
     jbyteArray ret = env->NewByteArray(size);
