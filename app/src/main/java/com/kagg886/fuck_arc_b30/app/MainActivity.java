@@ -58,17 +58,17 @@ public class MainActivity extends AppCompatActivity {
         ActivityMain2Binding binding = ActivityMain2Binding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        //应该是以 Arcaea 进程身份读取，而不是以 app 进程
-        //Toast.makeText(this, String.valueOf(ArcaeaMemReader.Test()), Toast.LENGTH_SHORT).show();
-        var o = Maps.GetMemoryMap();
-
-        Log.i("LOCAL","MemMapSize="+Integer.toString(o.length));
-        for(int i=0;i<o.length;i++){
-            Log.i("LOCAL",
-                    "Addr="+Long.toHexString(o[i].StartAddress)+"-"+Long.toHexString(o[i].EndAddress)+"" +
-                    " - R="+o[i].Permission.Read +",W="+o[i].Permission.Write+
-                    " -> "+o[i].Module);
-        }
+//        //应该是以 Arcaea 进程身份读取，而不是以 app 进程
+//        //Toast.makeText(this, String.valueOf(ArcaeaMemReader.Test()), Toast.LENGTH_SHORT).show();
+//        var o = Maps.GetMemoryMap();
+//
+//        Log.i("LOCAL","MemMapSize="+Integer.toString(o.length));
+//        for(int i=0;i<o.length;i++){
+//            Log.i("LOCAL",
+//                    "Addr="+Long.toHexString(o[i].StartAddress)+"-"+Long.toHexString(o[i].EndAddress)+"" +
+//                    " - R="+o[i].Permission.Read +",W="+o[i].Permission.Write+
+//                    " -> "+o[i].Module);
+//        }
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each

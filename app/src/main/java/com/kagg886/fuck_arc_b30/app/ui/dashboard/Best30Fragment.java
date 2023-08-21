@@ -53,9 +53,6 @@ public class Best30Fragment extends Fragment {
                         .timeout(5000)
                         .execute().body();
 
-                //get user body
-                UserProfile profile = IOUtil.fetch(Profile.INSTANCE, UserProfile.class);
-
                 JSONArray arr = JSON.parseObject(body).getJSONArray("data");
 
                 if (arr == null) {
@@ -93,6 +90,15 @@ public class Best30Fragment extends Fragment {
 //                    break; //只运行一个的测试
                 }
 
+                //get user body
+                UserProfile profile = IOUtil.fetch(Profile.INSTANCE, UserProfile.class);
+
+                if (profile == null) {
+                    double pttReal = models.stream().mapToDouble(Best30Model::getPtt).sum() / 30;
+                    profile = new UserProfile("RealPtt服务不可用",pttReal,pttReal,0);
+                }
+
+
                 double b30Avt = profile.getPttB30();
                 int ratingType;
 
@@ -115,11 +121,12 @@ public class Best30Fragment extends Fragment {
                 }
 
                 Bitmap ratingImg = IOUtil.loadArcaeaResource("img/rating_" + ratingType + ".png");
+                UserProfile finalProfile = profile;
                 CrashHandler.getCurrentActivity().runOnUiThread(() -> {
-                    binding.fragmentB30User.setText(profile.getName());
-                    binding.fragmentB30PttB30.setText(String.format("%.2f",profile.getPttB30()));
-                    binding.fragmentB30PttR10.setText(String.format("%.2f",profile.getPttR10()));
-                    binding.fragmentB30Ptt.setText(String.format("%.2f",profile.getPttReal()));
+                    binding.fragmentB30User.setText(finalProfile.getName());
+                    binding.fragmentB30PttB30.setText(String.format("B30:%.2f", finalProfile.getPttB30()));
+                    binding.fragmentB30PttR10.setText(String.format("R10:%.2f", finalProfile.getPttR10()));
+                    binding.fragmentB30Ptt.setText(String.format("%.2f", finalProfile.getPttReal()));
 
                     binding.fragmentB30Bg.setBackground(new BitmapDrawable(getResources(),ratingImg));
                 });
