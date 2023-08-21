@@ -28,8 +28,9 @@ public class Hooker implements IXposedHookLoadPackage {
         //兼容共存版arc
         Class<?> AppActivityClass;
         try {
-            Utils.runAsync(() -> Log.i(Hooker.class.getName(), "Your Local IP is:" + Utils.getLocalIp()));
-            //attach Context
+
+            //如果完全断网的话，Arcaea会崩溃。
+            //Utils.runAsync(() -> Log.i(Hooker.class.getName(), "Your Local IP is:" + Utils.getLocalIp()));
             AppActivityClass = loadPackageParam.classLoader.loadClass("low.moe.AppActivity");
             Method onCreate = AppActivityClass.getDeclaredMethod("onCreate", Bundle.class);
             XposedBridge.hookMethod(onCreate, new XC_MethodHook() {
@@ -51,6 +52,7 @@ public class Hooker implements IXposedHookLoadPackage {
                         HttpServer.getInstance().addRoute(Best30.INSTANCE);
                         HttpServer.getInstance().addRoute(AssetsGet.INSTANCE);
                         HttpServer.getInstance().addRoute(DumpLog.INSTANCE);
+                        HttpServer.getInstance().addRoute(pttfetch.INSTANCE);
 
                         HttpServer.getInstance().startServer(61616);
 

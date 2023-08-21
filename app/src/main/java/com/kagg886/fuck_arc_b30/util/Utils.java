@@ -39,6 +39,8 @@ public class Utils {
     }
 
 
+    //此方法会在无网络是让 Arcaea 崩溃
+    // by ChinaYuanGe
     public static String getLocalIp() {
         try (Socket socket = new Socket("baidu.com", 80)) {
             return socket.getLocalAddress().getHostAddress();
