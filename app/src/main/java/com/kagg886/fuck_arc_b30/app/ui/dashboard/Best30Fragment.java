@@ -17,8 +17,8 @@ import androidx.fragment.app.Fragment;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.kagg886.fuck_arc_b30.app.CrashHandler;
 import com.kagg886.fuck_arc_b30.R;
+import com.kagg886.fuck_arc_b30.app.CrashHandler;
 import com.kagg886.fuck_arc_b30.databinding.FragmentBest30Binding;
 import com.kagg886.fuck_arc_b30.server.model.Best30Model;
 import com.kagg886.fuck_arc_b30.server.model.SingleSongData;
@@ -56,7 +56,7 @@ public class Best30Fragment extends Fragment {
                 JSONArray arr = JSON.parseObject(body).getJSONArray("data");
 
                 if (arr == null) {
-                    Log.e(getClass().getName(),"B30 fetch failed!,response:" + body);
+                    Log.e(getClass().getName(), "B30 fetch failed!,response:" + body);
                     AlertDialog.Builder builder = new AlertDialog.Builder(CrashHandler.getCurrentActivity());
                     builder.setTitle("b30拉取失败");
                     builder.setMessage("拉取body如下:\n" + body + "\n截图前往github提交issue！");
@@ -95,7 +95,7 @@ public class Best30Fragment extends Fragment {
 
                 if (profile == null) {
                     double pttReal = models.stream().mapToDouble(Best30Model::getPtt).sum() / 30;
-                    profile = new UserProfile("RealPtt服务不可用",pttReal,pttReal,0);
+                    profile = new UserProfile("RealPtt服务不可用", pttReal, pttReal, 0);
                 }
 
 
@@ -128,7 +128,7 @@ public class Best30Fragment extends Fragment {
                     binding.fragmentB30PttR10.setText(String.format("R10:%.2f", finalProfile.getPttR10()));
                     binding.fragmentB30Ptt.setText(String.format("%.2f", finalProfile.getPttReal()));
 
-                    binding.fragmentB30Bg.setBackground(new BitmapDrawable(getResources(),ratingImg));
+                    binding.fragmentB30Bg.setBackground(new BitmapDrawable(getResources(), ratingImg));
                 });
             } catch (IOException e) {
                 CrashHandler.getCurrentActivity().runOnUiThread(() -> {
@@ -171,11 +171,12 @@ public class Best30Fragment extends Fragment {
         ImageView b30ScoreType = view.findViewById(R.id.b30_scoreType);
         ImageView b30ClearType = view.findViewById(R.id.b30_clearType);
         ImageView b30SongImg = view.findViewById(R.id.b30_song_img);
+        ImageView b30DiffType = view.findViewById(R.id.b30_diff_type);
 
 
         String name = best30Model.getName();
         if (name.length() > 18) {
-            name = name.substring(0,16) + "...";
+            name = name.substring(0, 16) + "...";
         }
         b30Name.setText(name);
         b30Score.setText(String.valueOf(data.getScore()));
@@ -221,15 +222,16 @@ public class Best30Fragment extends Fragment {
                     scoreType = "d";
                 }
 
-                Bitmap songImg, clearTypeImg, scoreTypeImg;
+                Bitmap songImg, clearTypeImg, scoreTypeImg, diffTypeImg;
                 songImg = IOUtil.loadArcaeaSongImage(data);
                 clearTypeImg = IOUtil.loadArcaeaResource("img/clear_type/" + clearType + ".png");
                 scoreTypeImg = IOUtil.loadArcaeaResource("img/grade/mini/" + scoreType + ".png");
-
+                diffTypeImg = IOUtil.loadArcaeaResource("layouts/multiplayer/tag-difficulty-" + best30Model.getData().getDifficulty().name().toLowerCase() + ".png");
                 CrashHandler.getCurrentActivity().runOnUiThread(() -> {
                     b30SongImg.setImageBitmap(songImg);
                     b30ClearType.setImageBitmap(clearTypeImg);
                     b30ScoreType.setImageBitmap(scoreTypeImg);
+                    b30DiffType.setImageBitmap(diffTypeImg);
                 });
             } catch (IOException e) {
                 CrashHandler.getCurrentActivity().runOnUiThread(() -> {

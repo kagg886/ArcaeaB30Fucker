@@ -44,7 +44,7 @@ public class IOUtil {
                 .timeout(5000)
                 .execute()
                 .body();
-        Log.d(IOUtil.class.getName(),"fetch:" + url.getPath() + "'s result is:" + body);
+        Log.d(IOUtil.class.getName(), "fetch:" + url.getPath() + "'s result is:" + body);
         try {
             JSONObject json = JSON.parseObject(body);
             if (json.getIntValue("code") != Result.OK().getCode()) {
@@ -73,19 +73,27 @@ public class IOUtil {
         if (data.getId() == null) {
             Log.d(IOUtil.class.getName(), data + "is illegal");
         }
-        Connection.Response response = Jsoup.connect(base + Image.INSTANCE.getPath())
+        Connection conn = Jsoup.connect(base + Image.INSTANCE.getPath())
                 .ignoreContentType(true)
                 .method(Image.INSTANCE.getMethod() == AbstractServlet.Method.POST ? Connection.Method.POST : Connection.Method.GET)
                 .timeout(5000)
                 .data("id", data.getId())
-                .data("difficulty", data.getDifficulty().name())
-                .execute();
-
+                .data("difficulty", data.getDifficulty().name());
+        Bitmap res = BitmapFactory.decodeStream(conn.execute().bodyStream());
+        if (res == null) {
+            conn = Jsoup.connect(base + Image.INSTANCE.getPath())
+                    .ignoreContentType(true)
+                    .method(Image.INSTANCE.getMethod() == AbstractServlet.Method.POST ? Connection.Method.POST : Connection.Method.GET)
+                    .timeout(5000)
+                    .data("id", data.getId());
+            //防止prs,pst,byd曲绘获取失败问题
+            res = BitmapFactory.decodeStream(conn.execute().bodyStream());
+        }
         //| *id        | 一个字符串，代表要查询的id                   |
         //| ---------- | -------------------------------------------- |
         //| difficulty | 难度，可以填写难度和难度代号，默认为future。 |
         //| size       | 大小，可填写256和512，默认为256              |
-        return BitmapFactory.decodeStream(response.bodyStream());
+        return res;
     }
 
     public static void zipFile(File src, File dst) throws IOException {

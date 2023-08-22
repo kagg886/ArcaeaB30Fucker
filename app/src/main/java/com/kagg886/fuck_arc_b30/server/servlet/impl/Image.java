@@ -40,12 +40,12 @@ public class Image extends AbstractServlet {
         if (difficulty != null) {
             c:
             {
-                if (difficulty.equals("PRESENT") || difficulty.equals("PAST") || difficulty.equals("BEYOND")) {
+                if (difficulty.equalsIgnoreCase("PRESENT") || difficulty.equalsIgnoreCase("PAST") || difficulty.equalsIgnoreCase("BEYOND")) {
                     songName = String.valueOf(SingleSongData.Difficulty.valueOf(difficulty).getDiff());
                     break c;
                 }
 
-                if (difficulty.equals("FUTURE")) {
+                if (difficulty.equalsIgnoreCase("FUTURE")) {
                     songName = "base";
                     break c;
                 }
