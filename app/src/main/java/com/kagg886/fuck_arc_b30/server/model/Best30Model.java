@@ -10,7 +10,6 @@ public class Best30Model {
     private final String name;
     private final SingleSongData data;
     private final double ptt;
-
     private final double ex_diff;
 
     public Best30Model(String name, SingleSongData data, double ptt,double ex_diff) {

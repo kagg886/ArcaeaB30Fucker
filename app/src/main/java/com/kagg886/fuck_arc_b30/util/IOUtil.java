@@ -18,6 +18,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -72,28 +74,47 @@ public class IOUtil {
     public static Bitmap loadArcaeaSongImage(SingleSongData data) throws IOException {
         if (data.getId() == null) {
             Log.d(IOUtil.class.getName(), data + "is illegal");
+            throw new NullPointerException();
         }
-        Connection conn = Jsoup.connect(base + Image.INSTANCE.getPath())
-                .ignoreContentType(true)
-                .method(Image.INSTANCE.getMethod() == AbstractServlet.Method.POST ? Connection.Method.POST : Connection.Method.GET)
-                .timeout(5000)
-                .data("id", data.getId())
-                .data("difficulty", data.getDifficulty().name());
-        Bitmap res = BitmapFactory.decodeStream(conn.execute().bodyStream());
-        if (res == null) {
-            conn = Jsoup.connect(base + Image.INSTANCE.getPath())
-                    .ignoreContentType(true)
-                    .method(Image.INSTANCE.getMethod() == AbstractServlet.Method.POST ? Connection.Method.POST : Connection.Method.GET)
-                    .timeout(5000)
-                    .data("id", data.getId());
-            //防止prs,pst,byd曲绘获取失败问题
-            res = BitmapFactory.decodeStream(conn.execute().bodyStream());
+
+        AtomicReference<Bitmap> res = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        Utils.runUntilNoError(() -> {
+            try {
+                Connection conn = Jsoup.connect(base + Image.INSTANCE.getPath())
+                        .ignoreContentType(true)
+                        .method(Image.INSTANCE.getMethod() == AbstractServlet.Method.POST ? Connection.Method.POST : Connection.Method.GET)
+                        .timeout(5000)
+                        .data("id", data.getId())
+                        .data("difficulty", data.getDifficulty().name());
+                res.set(BitmapFactory.decodeStream(conn.execute().bodyStream()));
+                if (res.get() == null) {
+                    conn = Jsoup.connect(base + Image.INSTANCE.getPath())
+                            .ignoreContentType(true)
+                            .method(Image.INSTANCE.getMethod() == AbstractServlet.Method.POST ? Connection.Method.POST : Connection.Method.GET)
+                            .timeout(5000)
+                            .data("id", data.getId());
+                    //防止prs,pst,byd曲绘获取失败问题
+                    res.set(BitmapFactory.decodeStream(conn.execute().bodyStream()));
+                    if (res.get() == null) {
+                        throw new RuntimeException();
+                    }
+                }
+                latch.countDown();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
         //| *id        | 一个字符串，代表要查询的id                   |
         //| ---------- | -------------------------------------------- |
         //| difficulty | 难度，可以填写难度和难度代号，默认为future。 |
         //| size       | 大小，可填写256和512，默认为256              |
-        return res;
+        return res.get();
     }
 
     public static void zipFile(File src, File dst) throws IOException {

@@ -95,7 +95,9 @@ public class Best30Fragment extends Fragment {
 
                 if (profile == null) {
                     double pttReal = models.stream().mapToDouble(Best30Model::getPtt).sum() / 30;
-                    profile = new UserProfile("RealPtt服务不可用", pttReal, pttReal, 0);
+                    double pttMax = pttReal + models.subList(0, 10).stream().mapToDouble(Best30Model::getPtt).sum() / 10;
+                    pttMax /= 2;
+                    profile = new UserProfile("RealPtt服务不可用", pttReal, pttReal, 0, pttMax);
                 }
 
 
@@ -124,6 +126,7 @@ public class Best30Fragment extends Fragment {
                 UserProfile finalProfile = profile;
                 CrashHandler.getCurrentActivity().runOnUiThread(() -> {
                     binding.fragmentB30User.setText(finalProfile.getName());
+                    binding.fragmentB30PttMax.setText(String.format("无推分最高PTT:%.2f", finalProfile.getPttMax()));
                     binding.fragmentB30PttB30.setText(String.format("B30:%.2f", finalProfile.getPttB30()));
                     binding.fragmentB30PttR10.setText(String.format("R10:%.2f", finalProfile.getPttR10()));
                     binding.fragmentB30Ptt.setText(String.format("%.2f", finalProfile.getPttReal()));
@@ -238,7 +241,6 @@ public class Best30Fragment extends Fragment {
                     Toast.makeText(CrashHandler.getCurrentActivity(), "B30图片加载失败，请检查服务端存活状态", Toast.LENGTH_SHORT).show();
                     CrashHandler.getCurrentActivity().navigateTo(R.id.navigation_home);
                 });
-
             }
         }).start();
 

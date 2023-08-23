@@ -10,6 +10,8 @@ import com.kagg886.fuck_arc_b30.util.ArcaeaMemReader;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 
+import java.util.List;
+
 
 /**
  * @author kagg886
@@ -31,10 +33,15 @@ public class Profile extends AbstractServlet {
             return;
         }
 
-        double b30_ptt = Best30.getB30Models().stream().mapToDouble(Best30Model::getPtt).sum() / 30;
+        List<Best30Model> model = Best30.getB30Models();
+        double b30_ptt = model.stream().mapToDouble(Best30Model::getPtt).sum() / 30;
 
         double r10_ptt = ptt * 2 - b30_ptt;
-        response.send(JSON.toJSONString(Result.OK(new UserProfile(UserManager.userName, ptt, b30_ptt, r10_ptt))));
+
+        //max ptt算法是r10=b10
+        double max_ptt = b30_ptt + model.subList(0,10).stream().mapToDouble(Best30Model::getPtt).sum() / 10;
+        max_ptt/=2;
+        response.send(JSON.toJSONString(Result.OK(new UserProfile(UserManager.userName, ptt, b30_ptt, r10_ptt,max_ptt))));
         //response.send(ArcaeaMemReader.Test());
     }
 }
