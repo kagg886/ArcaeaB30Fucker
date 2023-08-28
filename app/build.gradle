@@ -11,7 +11,7 @@ android {
     //4.前面的位数叠加后，后面的位数从零开始计算。
     defaultConfig {
         applicationId "com.kagg886.fuck_arc_b30"
-        minSdk 28
+        minSdk 26
         targetSdk 32
         versionCode 6
         versionName "V1.3.0"
