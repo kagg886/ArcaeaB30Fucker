@@ -59,6 +59,12 @@ public class MemoryMap {
 
             m.Module = sysIndex < 0 ? (pathIndex < 0 ? "UNKNOWN_MODULE" : target.substring(pathIndex)) : target.substring(sysIndex);
 
+            long sameCount = mlist.stream().filter((x)->{
+                return x.Module.contains(m.Module);
+            }).count();
+
+            m.Module = sameCount > 0 ? (m.Module + "." + sameCount) : m.Module;
+
             mlist.add(m);
         }
 
