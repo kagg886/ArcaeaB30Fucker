@@ -36,11 +36,11 @@ public class Profile extends AbstractServlet {
         List<Best30Model> model = Best30.getB30Models();
         double b30_ptt = model.stream().mapToDouble(Best30Model::getPtt).sum() / 30;
 
-        double r10_ptt = ptt * 2 - b30_ptt;
+        // b30 和 r10 的配合是 3/4 和 1/4
+        double r10_ptt = (ptt - b30_ptt * .75) * 4;
 
         //max ptt算法是r10=b10
-        double max_ptt = b30_ptt + model.subList(0,10).stream().mapToDouble(Best30Model::getPtt).sum() / 10;
-        max_ptt/=2;
+        double max_ptt = b30_ptt * .75 + ((model.subList(0,10).stream().mapToDouble(Best30Model::getPtt).sum() / 10) * .25);
         response.send(JSON.toJSONString(Result.OK(new UserProfile(UserManager.userName, ptt, b30_ptt, r10_ptt,max_ptt))));
         //response.send(ArcaeaMemReader.Test());
     }
