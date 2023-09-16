@@ -3,7 +3,7 @@ package xyz.cnyg.memoryreader;
 import xyz.cnyg.memoryreader.procfs.Maps;
 
 public class MemoryReader {
-    public static final String ProcFsPath = "/proc/"+String.valueOf(android.os.Process.myPid());
+    public static final String ProcFsPath = "/proc/"+ android.os.Process.myPid();
 
     public static byte ReadByte(long Address){
         byte[] data = ReadBytes(Address,1);

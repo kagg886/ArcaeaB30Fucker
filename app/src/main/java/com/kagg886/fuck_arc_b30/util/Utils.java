@@ -45,7 +45,7 @@ public class Utils {
         try (Socket socket = new Socket("baidu.com", 80)) {
             return socket.getLocalAddress().getHostAddress();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return "null";
         }
     }
 }

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
     <data-source source="LOCAL" name="st3" uuid="c00c6384-0ce9-4e2a-a48f-cae9c81e6f7e">
-      <driver-ref>sqlite.xerial</driver-ref>
+      <driver-ref>ad30b14f-1e7b-4dfd-b09a-e4f516ac4779</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:C:\Users\kagg886\AppData\Local\JetBrains\IntelliJIdea2023.1\device-explorer\xiaomi-21091116ac-B6SOQWRSIZ5LZL5T\data\data\moe.low.arc\files\st3</jdbc-url>

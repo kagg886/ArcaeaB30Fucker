@@ -9,6 +9,7 @@ import com.kagg886.fuck_arc_b30.server.res.SongManager;
 import com.kagg886.fuck_arc_b30.server.HttpServer;
 import com.kagg886.fuck_arc_b30.server.res.UserManager;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.*;
+import com.kagg886.fuck_arc_b30.util.Utils;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
@@ -30,7 +31,7 @@ public class Hooker implements IXposedHookLoadPackage {
         try {
 
             //如果完全断网的话，Arcaea会崩溃。
-            //Utils.runAsync(() -> Log.i(Hooker.class.getName(), "Your Local IP is:" + Utils.getLocalIp()));
+            Utils.runAsync(() -> Log.i(Hooker.class.getName(), "Your Local IP is:" + Utils.getLocalIp()));
             AppActivityClass = loadPackageParam.classLoader.loadClass("low.moe.AppActivity");
             Method onCreate = AppActivityClass.getDeclaredMethod("onCreate", Bundle.class);
             XposedBridge.hookMethod(onCreate, new XC_MethodHook() {
