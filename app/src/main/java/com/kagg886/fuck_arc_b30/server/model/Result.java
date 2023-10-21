@@ -18,8 +18,6 @@ public class Result<T> {
     public static final Function<String,Result<String>> ERR_NOT_PLAYED = (id) -> Result.err(1003,"id: " + id + " not played");
     public static final BiFunction<String,String[],Result<String>> ERR_PARAM_IS_ILLEGAL = (a, b) -> Result.err(1004,String.format("param: %s is illegal, correct input is: %s",a, Arrays.toString(b)));
     public static final Result<String> ERR_PTT_SEARCH_FAILED = Result.err(1005,"ptt search failed,please restart Arcaea");
-
-
     private final int code;
     private final String msg;
     private final T data;
