@@ -1,7 +1,10 @@
 package com.kagg886.fuck;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.kagg886.fuck_arc_b30.server.model.Result;
+import com.kagg886.fuck_arc_b30.util.ArcaeaMemReader;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -9,6 +12,12 @@ import org.jsoup.select.Elements;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.kagg886.fuck_arc_b30.server.res.UserManager.pkgInfo;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -38,5 +47,40 @@ public class ExampleUnitTest {
 
             System.out.printf("%s,%.2f,%.2f,%.2f,%.2f\n", name, pst, prs, ftr, byd);
         }
+    }
+
+    @Test
+    public void testNativePTTOnlineGet() throws IOException {
+
+        JSONArray list = JSON.parseArray(
+                Jsoup.connect("https://raw.githubusercontent.com/OllyDoge/ArcMemOffsets/main/offsets.json")
+                        .proxy("127.0.0.1",7890)
+                        .execute()
+                        .body()
+        );
+        JSONObject o = list.stream()
+                .map((v) -> ((JSONObject) v))
+                .filter((a) -> "5.0.1c".equals(a.getString("gamever")))
+                .findFirst()
+                .orElseThrow(() -> new NullPointerException("从线上配置中找不到当前版本的偏移量"));
+
+        o = o.getJSONObject("offsets").getJSONObject("userinfo");
+        ArcaeaMemReader.Profile.LocateValue = o.getString("locateValue");
+
+
+        List<Long> l = Arrays.stream(o.getString("memOffset").split(",")).map((a) -> Long.parseLong(a,16)).collect(Collectors.toList());
+        long[] a = new long[l.size()];
+        for (int i = 0; i < a.length; i++) {
+            a[i] = l.get(i);
+        }
+
+        System.out.println(o);
+        ArcaeaMemReader.Profile.LocateMemOffset = a;
+
+        ArcaeaMemReader.Profile.PTT = Long.parseLong(o.getJSONObject("struct").getString("ptt").split(",")[0],16);
+
+        System.out.println(ArcaeaMemReader.Profile.LocateValue);
+        System.out.println(Arrays.stream(ArcaeaMemReader.Profile.LocateMemOffset,0,ArcaeaMemReader.Profile.LocateMemOffset.length).mapToObj(Long::toHexString).collect(Collectors.joining(",")));
+        System.out.println(Long.toHexString(ArcaeaMemReader.Profile.PTT));
     }
 }

@@ -19,10 +19,6 @@ public class UserManager {
     public static void init() {
         try {
             pkgInfo = Hooker.activity.getPackageManager().getPackageInfo(Hooker.activity.getPackageName(), 0);
-
-            //google play版本的arc版本号不带 'c'
-            ArcaeaMemReader.IsGooglePlay = !pkgInfo.versionName.contains("c");
-
             SharedPreferences sp = Hooker.activity.getSharedPreferences("Cocos2dxPrefsFile", Context.MODE_PRIVATE);
             userName = sp.getString("lastLoggedInUsername", "离线");
         } catch (Exception e) {
