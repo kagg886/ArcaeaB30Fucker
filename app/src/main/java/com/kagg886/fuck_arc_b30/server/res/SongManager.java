@@ -149,9 +149,11 @@ public class SongManager {
         //初始化歌曲成绩
         loadScoreData();
 
+        //获取缓存的数据版本号
         SharedPreferences exactlyData = Hooker.activity.getSharedPreferences("arc_b30_fucker_exactly_data", Context.MODE_PRIVATE);
         String dataVersion = exactlyData.getString("version", null);
 
+        //获取缓存的详细定数信息
         if (UserManager.pkgInfo.versionName.equals(dataVersion)) {
             exactlyDiff = JSON.parseObject(exactlyData.getString("list", null), HashMap.class);
             Log.i(SongManager.class.getName(), "loaded exactly diff from cache");
@@ -160,7 +162,7 @@ public class SongManager {
             return true;
         }
 
-        //初始化定数详单
+        //版本对不上，在线获取定数信息
         AtomicReference<String> errSongId = new AtomicReference<>();
         AtomicReference<Throwable> err = new AtomicReference<>(null);
 
@@ -193,6 +195,7 @@ public class SongManager {
             throw new RuntimeException(e);
         }
 
+        //检查获取结果，退出app或抛出异常
         if (err.get() != null) {
             if (exitApp) {
                 Hooker.activity.runOnUiThread(() -> {
@@ -205,7 +208,7 @@ public class SongManager {
             return false;
         }
 
-        //开始校验：
+        //校验拉取的详单。规则为assets内的每一个id都有在线定数表的id相照应
         for (Object obj : SongManager.songDetailsList) {
             String songId = ((JSONObject) obj).getString("id");
             if (exactlyDiff.containsKey(songId)) {
@@ -224,6 +227,7 @@ public class SongManager {
             return false;
         }
 
+        //保存定数表
         exactlyData.edit().putString("list", JSON.toJSONString(exactlyDiff)).putString("version", UserManager.pkgInfo.versionName).apply();
         Log.i(SongManager.class.getName(), "loaded exactly diff from arcaea wiki");
         Log.v(SongManager.class.getName(), String.format("exactlyDiff(online) dump:\nVersion:%s\nDump:%s", UserManager.pkgInfo.versionName, JSON.toJSONString(exactlyDiff)));

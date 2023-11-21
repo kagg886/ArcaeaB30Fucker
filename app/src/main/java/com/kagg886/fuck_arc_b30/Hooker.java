@@ -9,6 +9,7 @@ import com.kagg886.fuck_arc_b30.server.res.SongManager;
 import com.kagg886.fuck_arc_b30.server.HttpServer;
 import com.kagg886.fuck_arc_b30.server.res.UserManager;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.*;
+import com.kagg886.fuck_arc_b30.util.ArcaeaMemReader;
 import com.kagg886.fuck_arc_b30.util.Utils;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -45,6 +46,20 @@ public class Hooker implements IXposedHookLoadPackage {
                     //init user
                     UserManager.init();
                     //init Resources
+
+                    //init offset for web
+                    Utils.runAsync(() -> {
+                        try {
+                            ArcaeaMemReader.init();
+                        } catch (Exception e) {
+                            Log.e(ArcaeaMemReader.class.getName(), "failed to load native param:", e);
+                            activity.runOnUiThread(() -> {
+                                Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                activity.finish();
+                            });
+                        }
+                    });
+
                     if (SongManager.init(true)) {
                         //start HTTPServer
                         HttpServer.getInstance().addRoute(RefreshResource.INSTANCE);
