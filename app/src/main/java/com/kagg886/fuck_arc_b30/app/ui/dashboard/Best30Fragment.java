@@ -3,6 +3,7 @@ package com.kagg886.fuck_arc_b30.app.ui.dashboard;
 import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +11,16 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.webkit.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.kagg886.fuck_arc_b30.BuildConfig;
+import com.kagg886.fuck_arc_b30.app.ui.dashboard.js.JSPacket;
+import com.kagg886.fuck_arc_b30.app.ui.dashboard.js.ServiceManager;
 import com.kagg886.fuck_arc_b30.databinding.FragmentBest30Binding;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,12 +61,16 @@ public class Best30Fragment extends Fragment {
         WebSettings webSetting = view.getSettings();
         webSetting.setJavaScriptEnabled(true);
 
-        WebViewCompat.WebMessageListener myListener = (view, message, sourceOrigin, isMainFrame, replyProxy) -> {
-            replyProxy.postMessage("Got it!");
-        };
+        ServiceManager.getInstance().injectJSObject(view,() -> {
+            Toast.makeText(requireActivity(), "当前应用不支持使用WebView渲染b30图片，请回滚旧版。", Toast.LENGTH_SHORT).show();
+            requireActivity().finish();
+        });
 
-        HashSet<String> allowedOriginRules = new HashSet<>(List.of(BuildConfig.HMR));
-        WebViewCompat.addWebMessageListener(view, "native", allowedOriginRules, myListener);
+        ServiceManager.getInstance().getReceiver().add((packet,api) -> {
+            if (packet.getType().equals("test")) {
+                api.postMessage(packet.asReply("OK!"));
+            }
+        });
 
         view.loadUrl(BuildConfig.HMR);
 
