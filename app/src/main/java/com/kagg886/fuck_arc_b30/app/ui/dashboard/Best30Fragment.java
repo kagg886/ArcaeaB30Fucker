@@ -1,44 +1,28 @@
 package com.kagg886.fuck_arc_b30.app.ui.dashboard;
 
 import android.annotation.SuppressLint;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.*;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.webkit.WebViewAssetLoader;
-import androidx.webkit.WebViewClientCompat;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
-import com.kagg886.fuck_arc_b30.R;
-import com.kagg886.fuck_arc_b30.app.CrashHandler;
+import androidx.webkit.*;
+import com.kagg886.fuck_arc_b30.BuildConfig;
 import com.kagg886.fuck_arc_b30.databinding.FragmentBest30Binding;
-import com.kagg886.fuck_arc_b30.server.model.Best30Model;
-import com.kagg886.fuck_arc_b30.server.model.SingleSongData;
-import com.kagg886.fuck_arc_b30.server.model.UserProfile;
-import com.kagg886.fuck_arc_b30.server.servlet.AbstractServlet;
-import com.kagg886.fuck_arc_b30.server.servlet.impl.Best30;
-import com.kagg886.fuck_arc_b30.server.servlet.impl.Profile;
-import com.kagg886.fuck_arc_b30.util.IOUtil;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class Best30Fragment extends Fragment {
 
@@ -46,7 +30,7 @@ public class Best30Fragment extends Fragment {
 
     private WebView view;
 
-    @SuppressLint({"DefaultLocale", "SetJavaScriptEnabled"})
+    @SuppressLint({"DefaultLocale", "SetJavaScriptEnabled", "RequiresFeature"})
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
@@ -71,7 +55,14 @@ public class Best30Fragment extends Fragment {
         WebSettings webSetting = view.getSettings();
         webSetting.setJavaScriptEnabled(true);
 
-        view.loadUrl("https://616sb.com/dist/index.html");
+        WebViewCompat.WebMessageListener myListener = (view, message, sourceOrigin, isMainFrame, replyProxy) -> {
+            replyProxy.postMessage("Got it!");
+        };
+
+        HashSet<String> allowedOriginRules = new HashSet<>(List.of(BuildConfig.HMR));
+        WebViewCompat.addWebMessageListener(view, "native", allowedOriginRules, myListener);
+
+        view.loadUrl(BuildConfig.HMR);
 
         return binding.getRoot();
     }

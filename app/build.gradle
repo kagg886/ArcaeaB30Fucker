@@ -13,16 +13,20 @@ android {
         applicationId "com.kagg886.fuck_arc_b30"
         minSdk 26
         targetSdk 32
-        versionCode 8
-        versionName "V1.3.2"
+        versionCode 10
+        versionName "V2.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
 
     buildTypes {
+        debug {
+            buildConfigField('String','HMR','"http://' + ip() + ':5173"')
+        }
         release {
             minifyEnabled false
+            buildConfigField('String','HMR','"https://616sb.com/dist/index.html"')
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -40,6 +44,10 @@ android {
     buildFeatures {
         viewBinding true
     }
+}
+
+def ip() {
+    return new BufferedReader(new InputStreamReader(Runtime.runtime.exec('hostname -I').inputStream)).readLine().split(' ')[0]
 }
 
 dependencies {
@@ -62,4 +70,7 @@ dependencies {
     implementation 'com.koushikdutta.async:androidasync:2.2.1'
     implementation 'com.alibaba.fastjson2:fastjson2:2.0.42'
     implementation 'org.jsoup:jsoup:1.15.3'
+
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation 'androidx.webkit:webkit:1.8.0'
 }
