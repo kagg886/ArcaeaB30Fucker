@@ -13,8 +13,8 @@ android {
         applicationId "com.kagg886.fuck_arc_b30"
         minSdk 26
         targetSdk 32
-        versionCode 8
-        versionName "V1.3.2"
+        versionCode 9
+        versionName "V1.3.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -62,4 +62,7 @@ dependencies {
     implementation 'com.koushikdutta.async:androidasync:2.2.1'
     implementation 'com.alibaba.fastjson2:fastjson2:2.0.42'
     implementation 'org.jsoup:jsoup:1.15.3'
+
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation 'androidx.webkit:webkit:1.8.0'
 }
