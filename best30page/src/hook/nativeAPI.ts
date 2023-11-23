@@ -32,7 +32,7 @@ export const init = () => {
     }
 }
 
-export const sendMessage: (type: string, data?: any) => Promise<any> = (type: string, data: any = {}) => {
+export const useNativeAPI: (type: string, data?: any) => Promise<any> = (type: string, data: any = {}) => {
     const id = Math.floor(Math.random() * 1000000)
     const packet: Packet = {
         type,

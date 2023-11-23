@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import {Ref, ref} from "vue";
-import {sendMessage} from "./hook/nativeAPI.ts";
+import {useNativeAPI} from "./hook/nativeAPI.ts";
 import {UserProfile} from "./hook/type.ts";
 import UserName from "./components/UserName.vue";
+import Best30 from "./components/Best30List.vue";
+import ProgressBar from "./components/ProgressBar.vue";
 
 const divide = ref(20)
 const user: Ref<UserProfile> = ref({} as UserProfile)
@@ -14,9 +16,9 @@ const imageBase = ref('')
 //   return b.substring(0, b.indexOf(".") === -1 ? b.length : b.indexOf(".") + 3)
 // }
 
-sendMessage('getUserProfile').then((res: UserProfile) => {
+useNativeAPI('getUserProfile').then((res: UserProfile) => {
   if (res === {} as UserProfile) {
-    sendMessage('rollback', '无法连接到注入到Arcaea的后端服务')
+    useNativeAPI('rollback', '无法连接到注入到Arcaea的后端服务')
     return
   }
   user.value = res
@@ -44,11 +46,11 @@ sendMessage('getUserProfile').then((res: UserProfile) => {
     ratingType = 0;
   }
 
-  sendMessage('assets', "img/rating_" + ratingType + ".png").then((call) => {
+  useNativeAPI('assets', "img/rating_" + ratingType + ".png").then((call) => {
     imageBase.value = "data:image/jpeg;base64," + call
   })
 }).catch((error: string) => {
-  sendMessage('rollback', '无法连接到注入到Arcaea的后端服务:' + error)
+  useNativeAPI('rollback', '无法连接到注入到Arcaea的后端服务:' + error)
 })
 
 </script>
@@ -62,6 +64,14 @@ sendMessage('getUserProfile').then((res: UserProfile) => {
       </div>
     </div>
     <div class="container">
+      <Suspense>
+        <Best30/>
+        <template #fallback>
+          <div class="loading">
+            <progress-bar/>
+          </div>
+        </template>
+      </Suspense>
     </div>
   </div>
 </template>
@@ -77,7 +87,6 @@ sendMessage('getUserProfile').then((res: UserProfile) => {
 }
 
 .profile {
-  border-bottom: 1px solid red;
   width: 100%;
   height: v-bind(divide+ '%');
 

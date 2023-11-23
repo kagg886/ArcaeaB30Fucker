@@ -18,3 +18,8 @@
     src: url("../assets/font/Kazesawa-Regular.ttf");
     font-family: 'Kazesawa-Regular';
 }
+
+@font-face {
+    src: url("../assets/font/Andrea.otf");
+    font-family: 'Andrea';
+}
