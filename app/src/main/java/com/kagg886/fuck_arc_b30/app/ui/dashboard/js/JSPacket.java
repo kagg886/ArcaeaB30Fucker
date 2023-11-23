@@ -48,6 +48,10 @@ public class JSPacket {
     }
 
     public JSPacket asReply(Object data) {
-        return new JSPacket(type, JSON.toJSONString(data), id);
+        return new JSPacket(type, data.getClass() == String.class ? data.toString() : JSON.toJSONString(data), id);
+    }
+
+    public JSPacket asError(String cause) {
+        return new JSPacket("error", cause, id);
     }
 }

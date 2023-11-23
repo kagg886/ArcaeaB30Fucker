@@ -1,14 +1,18 @@
-import { defineConfig } from 'vite'
+import {defineConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue()],
-  base: './',
-  build: {
-    outDir: "../app/src/main/assets/dist",
-  },
-  server: {
-    host: '0.0.0.0'
-  }
+    plugins: [vue({
+      script: {
+        defineModel: true
+      }
+    })],
+    base: './',
+    build: {
+        outDir: "../app/src/main/assets/dist",
+    },
+    server: {
+        host: '0.0.0.0'
+    }
 })

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -54,7 +55,23 @@ public class ServiceManager implements WebViewCompat.WebMessageListener {
     @Override
     public void onPostMessage(@NonNull @NotNull WebView view, @NonNull @NotNull WebMessageCompat message, @NonNull @NotNull Uri sourceOrigin, boolean isMainFrame, @NonNull @NotNull JavaScriptReplyProxy replyProxy) {
         JSPacket p = JSON.parseObject(message.getData(), JSPacket.class);
+        if (p == null) {
+            Log.i("JSBridge", "[Server]throw a packet:" + message.getData());
+            return;
+        }
         Log.i("JSBridge", "[Server]recv->" + JSON.toJSONString(p));
-        receiver.forEach((a) -> a.accept(p, packet -> replyProxy.postMessage(JSON.toJSONString(packet))));
+        CompletableFuture.runAsync(() -> {
+            receiver.forEach((a) -> a.accept(p, new JSAPI() {
+                @Override
+                public void postMessage(Object reply) {
+                    replyProxy.postMessage(JSON.toJSONString(p.asReply(reply)));
+                }
+
+                @Override
+                public void postError(String cause) {
+                    replyProxy.postMessage(JSON.toJSONString(p.asError(cause)));
+                }
+            }));
+        });
     }
 }
