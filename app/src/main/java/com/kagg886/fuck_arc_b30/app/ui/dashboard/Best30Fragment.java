@@ -179,6 +179,10 @@ public class Best30Fragment extends Fragment implements BiConsumer<JSPacket, JSA
             try {
                 ByteArrayOutputStream output = new ByteArrayOutputStream();
                 Bitmap b = IOUtil.loadArcaeaResource(packet.getData());
+
+                if (b == null) {
+                    throw new IOException("failed to create bitmap:" + packet.getData());
+                }
                 b.compress(Bitmap.CompressFormat.PNG, 90, output);
 
                 api.postMessage(new String(Base64.getEncoder().encode(output.toByteArray()), StandardCharsets.UTF_8));
@@ -192,6 +196,9 @@ public class Best30Fragment extends Fragment implements BiConsumer<JSPacket, JSA
             try {
                 ByteArrayOutputStream output = new ByteArrayOutputStream();
                 Bitmap origin = IOUtil.loadArcaeaSongImage(JSON.parseObject(packet.getData(), SingleSongData.class));
+                if (origin == null) {
+                    throw new IOException("not find the resource:" + packet.getData());
+                }
 
                 Bitmap bmCopy = Bitmap.createBitmap(origin.getWidth(), origin.getHeight(), origin.getConfig());
 

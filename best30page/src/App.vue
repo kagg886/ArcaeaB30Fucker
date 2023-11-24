@@ -11,6 +11,7 @@ const user: Ref<UserProfile> = ref({} as UserProfile)
 
 const imageBase = ref('')
 
+
 // const myFix = (a: number) => {
 //   let b = a.toString()
 //   return b.substring(0, b.indexOf(".") === -1 ? b.length : b.indexOf(".") + 3)
@@ -83,7 +84,10 @@ useNativeAPI('getUserProfile').then((res: UserProfile) => {
 
   display: flex;
   flex-direction: column;
-
+  background-image: url("../assets/bg.png");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-attachment: fixed
 }
 
 .profile {
@@ -93,6 +97,7 @@ useNativeAPI('getUserProfile').then((res: UserProfile) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: white;
 }
 
 .container {

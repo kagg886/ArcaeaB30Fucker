@@ -1,78 +1,143 @@
 <script async setup lang="ts">
 import {Best30Details} from "../hook/type.ts";
 import {useNativeAPI} from "../hook/nativeAPI.ts";
-import {ref} from "vue";
+import {computed, inject, ref} from "vue";
 
 const props = defineProps<{
-  b30: Best30Details
+  data: Best30Details,
+  index: number
 }>()
 const bg = ref()
-const diff = ref()
+const diff = ref(inject('diff_' + props.data.data.difficulty))
 
-useNativeAPI('loadArcaeaSong', props.b30.data).then((res) => {
+useNativeAPI('loadArcaeaSong', props.data.data).then((res) => {
   bg.value = "url('data:image/jpeg;base64," + res + "')"
 })
+const random = ref((Math.random() + 0.5) + 's')
 
-let d;
-switch (props.b30.data.difficulty) {
-  case 'PAST':
-    d = 'pst'
-    break
-  case 'PRESENT':
-    d = 'prs'
-    break
-  case 'FUTURE':
-    d = 'ftr'
-    break
-  case 'BEYOND':
-    d = 'byd'
-    break
-}
-useNativeAPI('assets', "img/multiplayer/ingame-diff-" + d + ".png").then((call) => {
-  diff.value = "url('data:image/jpeg;base64," + call + "')"
+const getScoreType = computed(() => {
+  let scoreType;
+  let data = props.data.data.score
+  if (data > 9900000) {
+    scoreType = "explus";
+  } else if (data > 9800000) {
+    scoreType = "ex";
+  } else if (data > 9500000) {
+    scoreType = "aa";
+  } else if (data > 9200000) {
+    scoreType = "a";
+  } else if (data > 8900000) {
+    scoreType = "b";
+  } else if (data > 8600000) {
+    scoreType = "c";
+  } else {
+    scoreType = "d";
+  }
+  return 'score_' + scoreType
 })
-
-const p_bg = ref()
-const f_bg = ref()
-const l_bg = ref()
-
-//TODO need fix
-useNativeAPI('assets', "layouts/1080/results/pure-count.png").then((call) => {
-  p_bg.value = "url('data:image/jpeg;base64," + call + "')"
-})
-useNativeAPI('assets', "layouts/1080/results/far-count.png").then((call) => {
-  f_bg.value = "url('data:image/jpeg;base64," + call + "')"
-})
-useNativeAPI('assets', "layouts/1080/results/lost-count.png").then((call) => {
-  l_bg.value = "url('data:image/jpeg;base64," + call + "')"
-})
-
 </script>
 
 <template>
-  <canvas ref="canvas" style="display: none"></canvas>
   <div class="card">
     <div class="name">
-      {{ b30.name.substring(0, Math.min(15, b30.name.length)) }}{{ b30.name.length > 15 ? '...' : '' }}
+      #{{ index + 1 }} {{ data.name.substring(0, Math.min(15, data.name.length)) }}{{
+        data.name.length > 15 ? '...' : ''
+      }}
     </div>
     <ul>
-      <li style="background-image: v-bind(p_bg)">
-        pure: {{ b30.data.perfectCount }}({{ b30.data.shinyPerfectCount }})
+      <li>
+        <span :style="{color: '#09A1DD'}">P</span>
+        <span>{{ data.data.perfectCount }}({{ data.data.shinyPerfectCount }})</span>
       </li>
-      <li style="background-image: v-bind(f_bg)">
-        far: {{ b30.data.farCount }}
+      <li>
+        <span :style="{color: '#D68F38'}">F</span>
+        <span>{{ data.data.farCount }}</span>
       </li>
-      <li style="background-image: v-bind(l_bg)">
-        lost: {{b30.data.lostCount}}
+      <li>
+        <span :style="{color: '#A77ECD'}">L</span>
+        <span>{{ data.data.lostCount }}</span>
+      </li>
+      <li class="score">
+        <ul>
+          <li>
+            {{ data.data.score }}
+          </li>
+          <li>
+            <img :src="inject(getScoreType)" alt="">
+            <img :src="inject('clear_' + data.data.clearStatus)" alt="">
+          </li>
+        </ul>
       </li>
     </ul>
+
+    <ol class="center">
+      <li>
+        {{ data.ex_diff }}
+      </li>
+      <li style="transition: all 0s; transform: rotateZ(90deg) translateX(7px)">
+        →
+      </li>
+      <li>
+        {{ data.ptt }}
+      </li>
+    </ol>
   </div>
 </template>
 
 <style scoped>
 
-li {
+.center {
+  position: absolute;
+  left: 30%;
+  top: 50%;
+}
+
+.center > li {
+  font-weight: 800;
+  font-family: 'Ramaraja', serif;
   font-size: 10px;
+}
+
+img {
+  width: 35px;
+  height: 35px;
+}
+
+.score {
+  right: 0;
+  top: 0;
+  position: absolute;
+}
+
+.score > ul {
+  text-align: right;
+}
+
+.score > ul:first-child {
+  padding-right: 3px;
+  font-size: 18px;
+  -webkit-text-stroke: 1px white;
+}
+
+span {
+  font-size: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
+  font-family: 'ExoSemiBold', serif;
+}
+
+.card > ul {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 70%), rgba(0, 0, 0, 0));
+
+  position: relative;
+}
+
+li {
+  margin-bottom: -2px;
 }
 
 .card {
@@ -82,8 +147,9 @@ li {
   border-radius: 10px;
   margin-bottom: 5%;
   overflow: hidden;
+  position: relative;
 
-  animation: an 1s;
+  animation: an v-bind(random);
 
   background-image: v-bind(bg);
   background-position: center, center;
@@ -95,7 +161,7 @@ li {
 @keyframes an {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(50px);
   }
 
   to {
