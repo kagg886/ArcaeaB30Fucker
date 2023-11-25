@@ -69,12 +69,14 @@ public class Best30Fragment extends Fragment implements BiConsumer<JSPacket, JSA
         WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
                 .setDomain("616sb.com")
                 .addPathHandler("/", new WebViewAssetLoader.AssetsPathHandler(requireContext()))//对所有资源优先检查离线资源
+                .setHttpAllowed(true)
                 .build();
         WebView.setWebContentsDebuggingEnabled(true);
         view.setWebViewClient(new WebViewClientCompat() {
             @Nullable
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                Log.i(Best30Fragment.class.getName(),"route access:" + request.getUrl());
                 return assetLoader.shouldInterceptRequest(request.getUrl());
             }
         });
@@ -89,10 +91,10 @@ public class Best30Fragment extends Fragment implements BiConsumer<JSPacket, JSA
 
         ServiceManager.getInstance().getReceiver().add(this);
 
-        view.loadUrl(BuildConfig.HMR);
+        view.loadUrl(BuildConfig.HMR + "/index.html");
 
         binding.getRoot().setOnRefreshListener(() -> {
-            view.loadUrl(BuildConfig.HMR);
+            view.loadUrl(BuildConfig.HMR + "/index.html");
             binding.getRoot().setRefreshing(false);
         });
 

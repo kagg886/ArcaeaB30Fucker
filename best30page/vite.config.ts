@@ -10,7 +10,7 @@ export default defineConfig({
     })],
     base: './',
     build: {
-        outDir: "../app/src/main/assets/dist",
+        outDir: "../app/src/main/assets/",
     },
     server: {
         host: '0.0.0.0'

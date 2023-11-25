@@ -26,7 +26,7 @@ android {
         }
         release {
             minifyEnabled false
-            buildConfigField('String','HMR','"https://616sb.com/dist/index.html"')
+            buildConfigField('String','HMR','"http://616sb.com"')
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
