@@ -9,14 +9,7 @@ import ProgressBar from "./components/ProgressBar.vue";
 const divide = ref(20)
 const user: Ref<UserProfile> = ref({} as UserProfile)
 
-const imageBase = ref('')
-
-
-// const myFix = (a: number) => {
-//   let b = a.toString()
-//   return b.substring(0, b.indexOf(".") === -1 ? b.length : b.indexOf(".") + 3)
-// }
-
+const rating = ref('')
 useNativeAPI('getUserProfile').then((res: UserProfile) => {
   if (res === {} as UserProfile) {
     useNativeAPI('rollback', '无法连接到注入到Arcaea的后端服务')
@@ -47,9 +40,7 @@ useNativeAPI('getUserProfile').then((res: UserProfile) => {
     ratingType = 0;
   }
 
-  useNativeAPI('assets', "img/rating_" + ratingType + ".png").then((call) => {
-    imageBase.value = "data:image/jpeg;base64," + call
-  })
+  rating.value = "http://localhost:61616/arcapi/v1/res/assets?path=img/rating_" + ratingType + ".png"
 }).catch((error: string) => {
   useNativeAPI('rollback', '无法连接到注入到Arcaea的后端服务:' + error)
 })
@@ -59,9 +50,9 @@ useNativeAPI('getUserProfile').then((res: UserProfile) => {
 <template>
   <div class="bg">
     <div class="profile">
-      <user-name :user="user" v-model:imageBase="imageBase"></user-name>
+      <user-name :user="user" v-model:rating="rating"></user-name>
       <div>
-        ds
+        <img :src="'http://localhost:61616/arcapi/v1/res/assets?path=char/1080/7.png'" alt="" width="100px" height="100px">
       </div>
     </div>
     <div class="container">

@@ -6,10 +6,10 @@ defineProps<{
   user: UserProfile
 }>();
 
-const imageBase: Ref<String | undefined> = defineModel('imageBase')
+const rating: Ref<String | undefined> = defineModel('rating')
 
 const base = computed(() => {
-  return `url("${imageBase.value}")`
+  return `url("${rating.value}")`
 })
 console.log(base.value)
 </script>

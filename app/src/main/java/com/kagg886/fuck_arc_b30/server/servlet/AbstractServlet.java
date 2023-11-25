@@ -32,17 +32,22 @@ public abstract class AbstractServlet implements HttpServerRequestCallback {
     }
 
     public enum Method {
-        GET,POST
+        GET, POST
     }
 
     @Override
     public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
-        Log.i(getClass().getName(),String.format("Route accessed: %s",request.getPath()));
+        Log.i(getClass().getName(), String.format("Route accessed: %s", request.getPath()));
+
+        response.getHeaders().add("Access-Control-Allow-Credentials", "true");
+        response.getHeaders().add("Access-Control-Allow-Origin", "*");
+        response.getHeaders().add("Access-Control-Allow-Methods", "POST,GET,DELETE,PUT,OPTIONS");
+
         try {
-            onRequest0(request,response);
+            onRequest0(request, response);
         } catch (Throwable e) {
-            Log.e(getClass().getName(),"Route work error!",e);
-            response.send(JSON.toJSONString(new Result<>(-1,e.getClass().getName(),e.getMessage())));
+            Log.e(getClass().getName(), "Route work error!", e);
+            response.send(JSON.toJSONString(new Result<>(-1, e.getClass().getName(), e.getMessage())));
         }
     }
 

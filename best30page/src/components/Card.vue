@@ -1,6 +1,5 @@
 <script async setup lang="ts">
 import {Best30Details} from "../hook/type.ts";
-import {useNativeAPI} from "../hook/nativeAPI.ts";
 import {computed, inject, ref} from "vue";
 
 const props = defineProps<{
@@ -10,9 +9,7 @@ const props = defineProps<{
 const bg = ref()
 const diff = ref(inject('diff_' + props.data.data.difficulty))
 
-useNativeAPI('loadArcaeaSong', props.data.data).then((res) => {
-  bg.value = "url('data:image/jpeg;base64," + res + "')"
-})
+bg.value = `url('http://localhost:61616/arcapi/v1/res/image?id=${props.data.data.id}&difficulty=${props.data.data.difficulty}')`
 const random = ref((Math.random() + 0.5) + 's')
 
 const getScoreType = computed(() => {

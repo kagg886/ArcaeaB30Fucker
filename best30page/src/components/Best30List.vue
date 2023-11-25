@@ -15,19 +15,19 @@ import {useNativeAPI} from "../hook/nativeAPI.ts";
 import {provide, Ref, ref} from "vue";
 import {Best30Details} from "../hook/type.ts";
 import Card from "./Card.vue";
-const getAssets = async (a: string, surround: boolean = true) => {
-  return useNativeAPI('assets', a).then((call) => {
-    return surround ? "url('data:image/png;base64," + call + "')" : "data:image/png;base64," + call;
-  })
+
+const getAssets = (a: string, surround: boolean = false) => {
+  let call = 'http://localhost:61616/arcapi/v1/res/assets?path=' + a
+  return surround ? `url('${call}')` : call
 }
 
 const b30: Ref<Array<Best30Details>> = ref(await useNativeAPI('b30'))
 
 
-provide('diff_PAST', await getAssets("img/multiplayer/ingame-diff-pst.png"))
-provide('diff_PRESENT', await getAssets("img/multiplayer/ingame-diff-prs.png"))
-provide('diff_FUTURE', await getAssets("img/multiplayer/ingame-diff-ftr.png"))
-provide('diff_BEYOND', await getAssets("img/multiplayer/ingame-diff-byd.png"))
+provide('diff_PAST', getAssets("img/multiplayer/ingame-diff-pst.png",true))
+provide('diff_PRESENT', getAssets("img/multiplayer/ingame-diff-prs.png",true))
+provide('diff_FUTURE', getAssets("img/multiplayer/ingame-diff-ftr.png",true))
+provide('diff_BEYOND', getAssets("img/multiplayer/ingame-diff-byd.png",true))
 //
 // case 0 -> "fail";
 // case 1 -> "normal";
@@ -35,15 +35,15 @@ provide('diff_BEYOND', await getAssets("img/multiplayer/ingame-diff-byd.png"))
 // case 3 -> "pure";
 // case 4 -> "easy";
 // case 5 -> "hard";
-provide('clear_0', await getAssets("img/clear_type/fail.png", false))
-provide('clear_1', await getAssets("img/clear_type/normal.png", false))
-provide('clear_2', await getAssets("img/clear_type/full.png", false))
-provide('clear_3', await getAssets("img/clear_type/pure.png", false))
-provide('clear_4', await getAssets("img/clear_type/easy.png", false))
-provide('clear_5', await getAssets("img/clear_type/hard.png", false))
+provide('clear_0', getAssets("img/clear_type/fail.png", ))
+provide('clear_1', getAssets("img/clear_type/normal.png", ))
+provide('clear_2', getAssets("img/clear_type/full.png", ))
+provide('clear_3', getAssets("img/clear_type/pure.png", ))
+provide('clear_4', getAssets("img/clear_type/easy.png", ))
+provide('clear_5', getAssets("img/clear_type/hard.png", ))
 
-for (let a of ['explus','ex','aa','a','b','c','d']) {
-  provide(`score_${a}`, await getAssets(`img/grade/mini/${a}.png`, false))
+for (let a of ['explus', 'ex', 'aa', 'a', 'b', 'c', 'd']) {
+  provide(`score_${a}`,getAssets(`img/grade/mini/${a}.png`))
 }
 </script>
 
