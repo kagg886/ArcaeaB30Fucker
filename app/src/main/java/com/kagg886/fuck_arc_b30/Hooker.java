@@ -17,7 +17,10 @@ import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.ConnectException;
+import java.util.concurrent.CompletableFuture;
 
 public class Hooker implements IXposedHookLoadPackage {
     @SuppressLint("StaticFieldLeak")
@@ -48,33 +51,43 @@ public class Hooker implements IXposedHookLoadPackage {
                     //init Resources
 
                     //init offset for web
+
                     Utils.runAsync(() -> {
                         try {
                             ArcaeaMemReader.init();
                         } catch (Exception e) {
                             Log.e(ArcaeaMemReader.class.getName(), "failed to load native param:", e);
                             activity.runOnUiThread(() -> {
-                                Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                if (e instanceof ConnectException) {
+                                    Toast.makeText(activity, "无法加载Native偏移量，请尝试开启魔法上网", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(activity, "无法加载Native偏移量，请前往github issue", Toast.LENGTH_SHORT).show();
+                                }
                                 activity.finish();
                             });
                         }
                     });
-
                     if (SongManager.init(true)) {
+                        HttpServer i;
+                        try {
+                            i = HttpServer.getInstance();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                         //start HTTPServer
-                        HttpServer.getInstance().addRoute(RefreshResource.INSTANCE);
-                        HttpServer.getInstance().addRoute(Version.INSTANCE);
-                        HttpServer.getInstance().addRoute(GetSongInfoById.INSTANCE);
-                        HttpServer.getInstance().addRoute(GetPlayerDataById.INSTANCE);
-                        HttpServer.getInstance().addRoute(Image.INSTANCE);
-                        HttpServer.getInstance().addRoute(Best30.INSTANCE);
-                        HttpServer.getInstance().addRoute(AssetsGet.INSTANCE);
-                        HttpServer.getInstance().addRoute(DumpLog.INSTANCE);
-                        HttpServer.getInstance().addRoute(Profile.INSTANCE);
-
-                        HttpServer.getInstance().startServer(61616);
+                        i.addRoute(RefreshResource.INSTANCE);
+                        i.addRoute(Version.INSTANCE);
+                        i.addRoute(GetSongInfoById.INSTANCE);
+                        i.addRoute(GetPlayerDataById.INSTANCE);
+                        i.addRoute(Image.INSTANCE);
+                        i.addRoute(Best30.INSTANCE);
+                        i.addRoute(AssetsGet.INSTANCE);
+                        i.addRoute(DumpLog.INSTANCE);
+                        i.addRoute(Profile.INSTANCE);
 
                         activity.runOnUiThread(() -> Toast.makeText(activity, "Arcaea B30 Server Started!", Toast.LENGTH_SHORT).show());
+                        i.startServer(61616);
+
                     }
                 }
             });

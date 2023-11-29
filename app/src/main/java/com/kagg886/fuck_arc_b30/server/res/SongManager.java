@@ -171,7 +171,7 @@ public class SongManager {
         Utils.runAsync(() -> {
             JSONObject ex_diff_online;
             try {
-                Document dom = Jsoup.connect("https://wiki.arcaea.cn/index.php?title=Template:ChartConstant.json&action=edit").get();
+                Document dom = Jsoup.connect("https://arcwiki.mcd.blue/index.php?title=Template:ChartConstant.json&action=edit").get();
                 ex_diff_online = JSON.parseObject(dom.getElementById("wpTextbox1").text());
                 ex_diff_online.forEach((id, value1) -> {
                     errSongId.set(id);
