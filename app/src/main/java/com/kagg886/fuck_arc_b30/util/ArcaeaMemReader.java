@@ -36,7 +36,8 @@ public class ArcaeaMemReader {
         if (native_version.equals(pkgInfo.versionName)) {
             o = JSON.parseObject(exactlyData.getString("native_details", null));
         } else {
-            JSONArray list = JSON.parseArray(Jsoup.connect("https://raw.githubusercontent.com/OllyDoge/ArcMemOffsets/main/offsets.json").execute().body());
+            JSONArray list = JSON.parseArray(Jsoup.connect("https://raw.githubusercontent.com/OllyDoge/ArcMemOffsets/main/offsets.json")
+                    .timeout(10000).ignoreHttpErrors(true).ignoreContentType(true).execute().body());
             //光是抓取详细数据还不够，还需要比对出合适的版本号
             o = list.stream()
                     .map((v) -> ((JSONObject) v))

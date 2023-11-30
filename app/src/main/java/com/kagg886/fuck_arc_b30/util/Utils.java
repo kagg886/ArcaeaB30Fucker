@@ -1,9 +1,17 @@
 package com.kagg886.fuck_arc_b30.util;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.net.Socket;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 
 /**
  * 类
@@ -47,5 +55,23 @@ public class Utils {
         } catch (IOException e) {
             return "null";
         }
+    }
+
+    @SuppressLint({"TrustAllX509TrustManager", "CustomX509TrustManager"})
+    static public void ignoreALLSSL() throws Exception {
+        SSLContext context = SSLContext.getInstance("TLS");
+
+        context.init(null, new X509TrustManager[]{new X509TrustManager() {
+            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+            }
+
+            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+            }
+
+            public X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[0];
+            }
+        }}, new SecureRandom());
+        HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
     }
 }
