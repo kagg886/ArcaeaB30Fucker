@@ -113,8 +113,14 @@ public class Image extends AbstractServlet {
             try (InputStream stream = Hooker.activity.getAssets().open(queryUrl)) {
                 response.send("image/jpeg", IOUtil.loadByteFromStream(stream));
             } catch (FileNotFoundException e2) {
-                Log.d(Image.class.getName(), "find[" + queryUrl + "]failed");
-                response.send(JSON.toJSONString(Result.ERR_ID_NOT_EXISTS.apply(id)));
+                //有一些byd没有特殊曲绘，此时需要按ftr查找
+                queryUrl = "songs/dl_" + id + "/" + (id.equals("amazingmightyyyy") ? "" : "1080_") + "base" + size + ".jpg";
+                try (InputStream stream = Hooker.activity.getAssets().open(queryUrl)) {
+                    response.send("image/jpeg", IOUtil.loadByteFromStream(stream));
+                } catch (FileNotFoundException e3) {
+                    Log.d(Image.class.getName(), "find[" + queryUrl + "]failed");
+                    response.send(JSON.toJSONString(Result.ERR_ID_NOT_EXISTS.apply(id)));
+                }
             }
 
         }

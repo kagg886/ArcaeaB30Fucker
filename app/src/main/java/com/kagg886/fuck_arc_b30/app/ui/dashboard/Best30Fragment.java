@@ -83,6 +83,7 @@ public class Best30Fragment extends Fragment implements BiConsumer<JSPacket, JSA
 
         WebSettings webSetting = view.getSettings();
         webSetting.setJavaScriptEnabled(true);
+        webSetting.setDomStorageEnabled(true);
 
         ServiceManager.getInstance().injectJSObject(view, () -> {
             Toast.makeText(requireActivity(), "当前应用不支持使用WebView渲染b30图片，请回滚旧版。", Toast.LENGTH_SHORT).show();

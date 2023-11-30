@@ -22,7 +22,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField('String','HMR','"http://' + ip() + ':5173"')
+            buildConfigField('String','HMR','"http://' + ip(0) + ':5173"')
         }
         release {
             minifyEnabled false
@@ -46,7 +46,7 @@ android {
     }
 }
 
-def ip() {
+def ip(int a) {
     return new BufferedReader(new InputStreamReader(Runtime.runtime.exec('hostname -I').inputStream)).readLine().split(' ')[0]
 }
 

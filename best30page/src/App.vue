@@ -5,6 +5,7 @@ import {UserProfile} from "./hook/type.ts";
 import UserName from "./components/UserName.vue";
 import Best30 from "./components/Best30List.vue";
 import ProgressBar from "./components/ProgressBar.vue";
+import {charList, useCharacter} from "./store/character.ts";
 
 const divide = ref(20)
 const user: Ref<UserProfile> = ref({} as UserProfile)
@@ -45,15 +46,18 @@ useNativeAPI('getUserProfile').then((res: UserProfile) => {
   useNativeAPI('rollback', '无法连接到注入到Arcaea的后端服务:' + error)
 })
 
+const character = useCharacter();
+const openCharDialog = () => {
+  character.id = ++character.id % charList.length
+}
 </script>
 
 <template>
   <div class="bg">
     <div class="profile">
       <user-name :user="user" v-model:rating="rating"></user-name>
-      <div>
-        <img :src="'http://localhost:61616/arcapi/v1/res/assets?path=char/1080/7.png'" alt="" width="100px" height="100px">
-      </div>
+
+      <img @click="openCharDialog" class="img" :src="character.getURL()" alt="sss" width="130" height="130">
     </div>
     <div class="container">
       <Suspense>
@@ -69,16 +73,20 @@ useNativeAPI('getUserProfile').then((res: UserProfile) => {
 </template>
 
 <style scoped>
+
+.img {
+  margin-left: auto;
+}
+
 .bg {
   width: 85%;
   height: 100%;
 
   display: flex;
   flex-direction: column;
-  background-image: url("../assets/bg.png");
+  background-image: url("http://localhost:61616/arcapi/v1/res/assets?path=img/1080/bg_select_light.png");
   background-repeat: no-repeat;
   background-size: 100% 100%;
-  background-attachment: fixed
 }
 
 .profile {
