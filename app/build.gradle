@@ -13,16 +13,20 @@ android {
         applicationId "com.kagg886.fuck_arc_b30"
         minSdk 26
         targetSdk 32
-        versionCode 10
-        versionName "V1.3.4"
+        versionCode 11
+        versionName "V1.4.0-pre-1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
 
     buildTypes {
+        debug {
+            buildConfigField('String','HMR','"http://' + ip(0) + ':5173"')
+        }
         release {
             minifyEnabled false
+            buildConfigField('String','HMR','"http://616sb.com"')
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -40,6 +44,10 @@ android {
     buildFeatures {
         viewBinding true
     }
+}
+
+def ip(int a) {
+    return new BufferedReader(new InputStreamReader(Runtime.runtime.exec('hostname -I').inputStream)).readLine().split(' ')[0]
 }
 
 dependencies {

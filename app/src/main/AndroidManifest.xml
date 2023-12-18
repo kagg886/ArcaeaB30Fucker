@@ -2,9 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
           package="com.kagg886.fuck_arc_b30">
-
-    <uses-permission android:name="android.permission.INTERNET"/>
-
     <application
             android:name=".app.CrashHandler"
             android:usesCleartextTraffic="true"

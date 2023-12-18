@@ -1,0 +1,52 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    position: relative;
+}
+
+#app {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#app::after {
+    content: '';
+    display: block;
+    float: left;
+    position: absolute;
+    height: 100%;
+
+    width: 100%;
+    background-image: url("http://localhost:61616/arcapi/v1/res/assets?path=img/1080/bg_select_light.png");
+    filter: blur(3px);
+    z-index: -1;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+@font-face {
+    src: url("../assets/font/Exo-Medium.ttf");
+    font-family: 'ExoMedium';
+}
+
+@font-face {
+    src: url("../assets/font/Kazesawa-Regular.ttf");
+    font-family: 'Kazesawa-Regular';
+}
+
+@font-face {
+    src: url("../assets/font/Andrea.otf");
+    font-family: 'Andrea';
+}
+
+@font-face {
+    src: url("../assets/font/Exo-SemiBold.ttf");
+    font-family: 'ExoSemiBold';
+}

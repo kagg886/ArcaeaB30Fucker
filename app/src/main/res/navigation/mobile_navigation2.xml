@@ -3,14 +3,7 @@
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
             android:id="@+id/mobile_navigation2"
-            app:startDestination="@+id/navigation_home">
-
-    <fragment
-            android:id="@+id/navigation_home"
-            android:name="com.kagg886.fuck_arc_b30.app.ui.home.HomeFragment"
-            android:label="@string/title_summary"
-            tools:layout="@layout/fragment_home"/>
-
+            app:startDestination="@+id/navigation_dashboard">
     <fragment
             android:id="@+id/navigation_dashboard"
             android:name="com.kagg886.fuck_arc_b30.app.ui.dashboard.Best30Fragment"

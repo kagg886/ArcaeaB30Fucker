@@ -1,24 +1,41 @@
 package com.kagg886.fuck_arc_b30.app.ui.dashboard;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.*;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
+import androidx.core.view.MenuHost;
+import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
+import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewClientCompat;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.kagg886.fuck_arc_b30.BuildConfig;
 import com.kagg886.fuck_arc_b30.R;
-import com.kagg886.fuck_arc_b30.app.CrashHandler;
+import com.kagg886.fuck_arc_b30.app.ui.dashboard.js.JSAPI;
+import com.kagg886.fuck_arc_b30.app.ui.dashboard.js.JSPacket;
+import com.kagg886.fuck_arc_b30.app.ui.dashboard.js.ServiceManager;
 import com.kagg886.fuck_arc_b30.databinding.FragmentBest30Binding;
 import com.kagg886.fuck_arc_b30.server.model.Best30Model;
 import com.kagg886.fuck_arc_b30.server.model.SingleSongData;
@@ -26,121 +43,178 @@ import com.kagg886.fuck_arc_b30.server.model.UserProfile;
 import com.kagg886.fuck_arc_b30.server.servlet.AbstractServlet;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.Best30;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.Profile;
+import com.kagg886.fuck_arc_b30.server.servlet.impl.Version;
 import com.kagg886.fuck_arc_b30.util.IOUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
-public class Best30Fragment extends Fragment {
+public class Best30Fragment extends Fragment implements BiConsumer<JSPacket, JSAPI> {
 
     private FragmentBest30Binding binding;
 
-    @SuppressLint("DefaultLocale")
+    private WebView view;
+
+    @Override
+    public void onViewCreated(@NonNull @NotNull View view0, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view0, savedInstanceState);
+        ((MenuHost) requireActivity()).addMenuProvider(new MenuProvider() {
+            @Override
+            public void onCreateMenu(@NonNull @NotNull Menu menu, @NonNull @NotNull MenuInflater menuInflater) {
+                menuInflater.inflate(R.menu.fragment_b30_menu, menu);
+            }
+
+            @Override
+            public boolean onMenuItemSelected(@NonNull @NotNull MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+
+                    case R.id.menu_share -> {
+                        Bitmap bitmap = transfer();
+
+                        File f = requireActivity().getCacheDir().toPath().resolve("share.png").toFile();
+                        if (f.exists()) {
+                            f.delete();
+                        }
+                        try {
+                            f.createNewFile();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        try (FileOutputStream s = new FileOutputStream(f)){
+                            bitmap.compress(Bitmap.CompressFormat.PNG,80,s);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        var uri = FileProvider.getUriForFile(requireActivity(), requireActivity().getPackageName()+".fileprovider", f);
+                        startActivity(new Intent() {{
+                            setAction(ACTION_SEND);
+                            putExtra(Intent.EXTRA_STREAM,uri);
+                            setType("image/png");
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        }});
+//                            action = Intent.ACTION_SEND
+//                            putExtra(Intent.EXTRA_STREAM, uri)
+//                            type = "image/png"
+//                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    case R.id.menu_save -> {
+                        Bitmap bitmap = transfer();
+
+                        ContentResolver contentResolver = requireActivity().getContentResolver();
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(MediaStore.Images.ImageColumns.RELATIVE_PATH, "Pictures/arcaea_b30");
+                        contentValues.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, "b30.png");
+                        contentValues.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
+                        contentValues.put(MediaStore.Images.ImageColumns.WIDTH, bitmap.getWidth());
+                        contentValues.put(MediaStore.Images.ImageColumns.HEIGHT, bitmap.getHeight());
+                        Uri uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+
+                        try(OutputStream out = contentResolver.openOutputStream(uri)) {
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        bitmap.recycle();
+                        Toast.makeText(requireActivity(), "导出成功!请前往相册查看", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                return false;
+            }
+        }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+    }
+
+    private Bitmap transfer() {
+        view.measure(View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        canvas.drawBitmap(bitmap, 0, view.getMeasuredHeight(), paint);
+        view.draw(canvas);
+        return bitmap;
+    }
+
+    @SuppressLint({"DefaultLocale", "SetJavaScriptEnabled", "RequiresFeature"})
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
+        WebView.enableSlowWholeDocumentDraw();
+        WebView.setWebContentsDebuggingEnabled(true);
+
         binding = FragmentBest30Binding.inflate(inflater, container, false);
-
-        new Thread(() -> {
-            try {
-                //get b30 body
-                String body = Jsoup.connect(IOUtil.base + Best30.INSTANCE.getPath())
-                        .ignoreContentType(true)
-                        .method(Best30.INSTANCE.getMethod() == AbstractServlet.Method.GET ? Connection.Method.GET : Connection.Method.POST)
-                        .timeout(5000)
-                        .execute().body();
-
-                JSONArray arr = JSON.parseObject(body).getJSONArray("data");
-
-                if (arr == null) {
-                    Log.e(getClass().getName(), "B30 fetch failed!,response:" + body);
-                    AlertDialog.Builder builder = new AlertDialog.Builder(CrashHandler.getCurrentActivity());
-                    builder.setTitle("b30拉取失败");
-                    builder.setMessage("拉取body如下:\n" + body + "\n截图前往github提交issue！");
-                    CrashHandler.getCurrentActivity().runOnUiThread(() -> {
-                        builder.show();
-                        CrashHandler.getCurrentActivity().navigateTo(R.id.navigation_home);
-                    });
-                    return;
-                }
-                List<Best30Model> models = new ArrayList<>();
-                arr.forEach((model) -> {
-                    JSONObject source = (JSONObject) model;
-                    SingleSongData data = JSON.parseObject(source.getJSONObject("data").toString(), SingleSongData.class);
-                    //学艺不精，fastjson嵌套对象解析不会写，什么鸡掰东西.jpg
-                    Best30Model best30Model = new Best30Model(
-                            source.getString("name"),
-                            data,
-                            source.getDouble("ptt"),
-                            source.getDouble("ex_diff")
-                    );
-                    models.add(best30Model);
-                });
-                for (Best30Model model : models) {
-                    CrashHandler.getCurrentActivity().runOnUiThread(() -> {
-                        try {
-                            addB30Model(model);
-                        } catch (Exception e) {
-                            Log.e(getClass().getName(), "load b30 status Error!" + model, e);
-                        }
-                    });
-//                    break; //只运行一个的测试
-                }
-
-                //get user body
-                UserProfile profile = IOUtil.fetch(Profile.INSTANCE, UserProfile.class);
-
-                if (profile == null) {
-                    double pttReal = models.stream().mapToDouble(Best30Model::getPtt).sum() / 30;
-                    double pttMax = pttReal + models.subList(0, 10).stream().mapToDouble(Best30Model::getPtt).sum() / 10;
-                    pttMax /= 2;
-                    profile = new UserProfile("RealPtt服务不可用", pttReal, pttReal, 0, pttMax);
-                }
+        view = new WebView(requireActivity().getApplicationContext());
+        binding.getRoot().addView(view);
 
 
-                double b30Avt = profile.getPttB30();
-                int ratingType;
+        WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+                .setDomain("616sb.com")
+                .addPathHandler("/", new WebViewAssetLoader.AssetsPathHandler(requireContext()))//对所有资源优先检查离线资源
+                .setHttpAllowed(true)
+                .build();
 
-                if (b30Avt > 13.00) {
-                    ratingType = 7;
-                } else if (b30Avt > 12.50) {
-                    ratingType = 6;
-                } else if (b30Avt > 12.00) {
-                    ratingType = 5;
-                } else if (b30Avt > 11.00) {
-                    ratingType = 4;
-                } else if (b30Avt > 10.00) {
-                    ratingType = 3;
-                } else if (b30Avt > 7.00) {
-                    ratingType = 2;
-                } else if (b30Avt > 3.50) {
-                    ratingType = 1;
-                } else {
-                    ratingType = 0;
-                }
-
-                Bitmap ratingImg = IOUtil.loadArcaeaResource("img/rating_" + ratingType + ".png");
-                UserProfile finalProfile = profile;
-                CrashHandler.getCurrentActivity().runOnUiThread(() -> {
-                    binding.fragmentB30User.setText(finalProfile.getName());
-                    binding.fragmentB30PttMax.setText(String.format("无推分最高PTT:%.2f", finalProfile.getPttMax()));
-                    binding.fragmentB30PttB30.setText(String.format("B30:%.2f", finalProfile.getPttB30()));
-                    binding.fragmentB30PttR10.setText(String.format("R10:%.2f", finalProfile.getPttR10()));
-                    binding.fragmentB30Ptt.setText(String.format("%.2f", finalProfile.getPttReal()));
-
-                    binding.fragmentB30Bg.setBackground(new BitmapDrawable(getResources(), ratingImg));
-                });
-            } catch (IOException e) {
-                CrashHandler.getCurrentActivity().runOnUiThread(() -> {
-                    Toast.makeText(CrashHandler.getCurrentActivity(), "B30拉取失败，请检查服务端存活状态", Toast.LENGTH_SHORT).show();
-                    CrashHandler.getCurrentActivity().navigateTo(R.id.navigation_home);
-                });
-
+        view.setWebViewClient(new WebViewClientCompat() {
+            @Nullable
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                Log.i(Best30Fragment.class.getName(), "route access:" + request.getUrl());
+                return assetLoader.shouldInterceptRequest(request.getUrl());
             }
-        }).start();
+        });
+
+        WebSettings webSetting = view.getSettings();
+        webSetting.setJavaScriptEnabled(true);
+        webSetting.setDomStorageEnabled(true);
+
+        ServiceManager.getInstance().injectJSObject(view, () -> {
+            Toast.makeText(requireActivity(), "当前应用不支持使用WebView渲染b30图片，请回滚旧版。", Toast.LENGTH_SHORT).show();
+            requireActivity().finish();
+        });
+
+        ServiceManager.getInstance().getReceiver().add(this);
+
+        binding.getRoot().setOnRefreshListener(() -> {
+            binding.getRoot().setRefreshing(false);
+        });
+
+        AlertDialog dialog = new AlertDialog.Builder(requireActivity()).setTitle("检查后端存活状态...")
+                .setMessage("请稍等片刻...")
+                .create();
+
+        dialog.show();
+
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(1000);
+                IOUtil.fetch(Version.INSTANCE, Version.AppVersionInfo.class);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            requireActivity().runOnUiThread(() -> {
+                dialog.dismiss();
+                dialog.cancel();
+                view.loadUrl(BuildConfig.HMR + "/index.html");
+                binding.getRoot().setOnRefreshListener(() -> {
+                    view.loadUrl(BuildConfig.HMR + "/index.html");
+                    binding.getRoot().setRefreshing(false);
+                });
+            });
+        }).exceptionally((e) -> {
+            requireActivity().runOnUiThread(() -> {
+                Toast.makeText(requireActivity(), "无法连接到Arcaea后端，请检查后台存活状态", Toast.LENGTH_SHORT).show();
+                requireActivity().finish();
+            });
+            return null;
+        });
 
         return binding.getRoot();
     }
@@ -148,104 +222,77 @@ public class Best30Fragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        //回收WebView
+        view.loadUrl("about:blank");
+        binding.getRoot().removeView(view);
+        view.stopLoading();
+        view.getSettings().setJavaScriptEnabled(false);
+        view.clearHistory();
+        view.clearCache(true);
+        view.removeAllViewsInLayout();
+        view.removeAllViews();
+        view.setWebViewClient(null);
+        view.setWebChromeClient(null);
+        view.destroy();
+        view = null;
+
         binding = null;
     }
 
-    @SuppressLint("DefaultLocale")
-    private void addB30Model(Best30Model best30Model) {
-        SingleSongData data = best30Model.getData();
-        View view = LayoutInflater.from(CrashHandler.getCurrentActivity()).inflate(R.layout.card_b30, null);
-        view.setId(View.generateViewId());
-
-        view.setOnClickListener((v) -> {
-            new AlertDialog.Builder(CrashHandler.getCurrentActivity()).setTitle("DebugWindow")
-                    .setMessage(JSON.toJSONString(best30Model)).show();
-        });
-
-        TextView b30Name, b30Score, b30Ptt, b30CountP, b30CountF, b30CountL;
-        b30Name = view.findViewById(R.id.b30_name);
-        b30Score = view.findViewById(R.id.b30_score);
-        b30Ptt = view.findViewById(R.id.b30_ptt);
-        b30CountP = view.findViewById(R.id.b30_count_p);
-        b30CountF = view.findViewById(R.id.b30_count_f);
-        b30CountL = view.findViewById(R.id.b30_count_l);
-
-
-        ImageView b30ScoreType = view.findViewById(R.id.b30_scoreType);
-        ImageView b30ClearType = view.findViewById(R.id.b30_clearType);
-        ImageView b30SongImg = view.findViewById(R.id.b30_song_img);
-        ImageView b30DiffType = view.findViewById(R.id.b30_diff_type);
-
-
-        String name = best30Model.getName();
-        if (name.length() > 18) {
-            name = name.substring(0, 16) + "...";
-        }
-        b30Name.setText(name);
-        b30Score.setText(String.valueOf(data.getScore()));
-        b30Ptt.setText(String.format("%.2f(%.2f)", best30Model.getPtt(), best30Model.getEx_diff()));
-        b30CountP.setText(String.format("Pure:%d(%d)", data.getPerfectCount(), data.getShinyPerfectCount()));
-        b30CountF.setText(String.format("Far:%d", data.getFarCount()));
-        b30CountL.setText(String.format("Lost:%d", data.getLostCount()));
-
-        new Thread(() -> {
+    @Override
+    public void accept(JSPacket packet, JSAPI api) {
+        if (packet.getType().equals("getUserProfile")) {
             try {
-                String clearType = switch (best30Model.getData().getClearStatus()) {
-                    case 0 -> "fail";
-                    case 1 -> "normal";
-                    case 2 -> "full";
-                    case 3 -> "pure";
-                    case 4 -> "easy";
-                    case 5 -> "hard";
-                    default ->
-                            throw new IllegalStateException("Unexpected value: " + best30Model.getData().getClearStatus());
-                };
-
-                //EX+：9900000及以上（含PM）
-                //EX：9800000-9900000
-                //AA：9500000-9800000
-                //A：9200000-9500000
-                //B：8900000-9200000
-                //C：8600000-8900000
-                //D：8600000以下
-                String scoreType;
-                if (data.getScore() > 9900000) {
-                    scoreType = "explus";
-                } else if (data.getScore() > 9800000) {
-                    scoreType = "ex";
-                } else if (data.getScore() > 9500000) {
-                    scoreType = "aa";
-                } else if (data.getScore() > 9200000) {
-                    scoreType = "a";
-                } else if (data.getScore() > 8900000) {
-                    scoreType = "b";
-                } else if (data.getScore() > 8600000) {
-                    scoreType = "c";
+                UserProfile p = IOUtil.fetch(Profile.INSTANCE, UserProfile.class);
+                if (p == null) {
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireActivity(), "无法连接到Arcaea的后端服务，请检查Arcaea后台存活状态", Toast.LENGTH_SHORT).show();
+                        requireActivity().finish();
+                    });
                 } else {
-                    scoreType = "d";
+                    api.postMessage(p);
                 }
 
-                Bitmap songImg, clearTypeImg, scoreTypeImg, diffTypeImg;
-                songImg = IOUtil.loadArcaeaSongImage(data);
-                clearTypeImg = IOUtil.loadArcaeaResource("img/clear_type/" + clearType + ".png");
-                scoreTypeImg = IOUtil.loadArcaeaResource("img/grade/mini/" + scoreType + ".png");
-                diffTypeImg = IOUtil.loadArcaeaResource("layouts/multiplayer/tag-difficulty-" + best30Model.getData().getDifficulty().name().toLowerCase() + ".png");
-                CrashHandler.getCurrentActivity().runOnUiThread(() -> {
-                    b30SongImg.setImageBitmap(songImg);
-                    b30ClearType.setImageBitmap(clearTypeImg);
-                    b30ScoreType.setImageBitmap(scoreTypeImg);
-                    b30DiffType.setImageBitmap(diffTypeImg);
-                });
+            } catch (IOException ignored) {
+            }
+        }
+
+        if (packet.getType().equals("b30")) {
+            //get b30 body
+            String body = null;
+            try {
+                body = Jsoup.connect(IOUtil.base + Best30.INSTANCE.getPath())
+                        .ignoreContentType(true)
+                        .method(Best30.INSTANCE.getMethod() == AbstractServlet.Method.GET ? Connection.Method.GET : Connection.Method.POST)
+                        .timeout(5000)
+                        .execute().body();
             } catch (IOException e) {
-                CrashHandler.getCurrentActivity().runOnUiThread(() -> {
-                    Toast.makeText(CrashHandler.getCurrentActivity(), "B30图片加载失败，请检查服务端存活状态", Toast.LENGTH_SHORT).show();
-                    CrashHandler.getCurrentActivity().navigateTo(R.id.navigation_home);
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireActivity(), "拉取b30失败，请检查注入到Arcaea的后端是否在线！", Toast.LENGTH_SHORT).show();
+                    requireActivity().finish();
                 });
             }
-        }).start();
 
+            JSONArray arr = Objects.requireNonNull(JSON.parseObject(body)).getJSONArray("data");
 
-        binding.b30Container.addView(view);
-        binding.b30Flow.addView(view);
+            if (arr == null) {
+                api.postError("b30拉取失败!,body如下:" + body);
+                return;
+            }
+            List<Best30Model> models = new ArrayList<>();
+            arr.forEach((model) -> {
+                JSONObject source = (JSONObject) model;
+                SingleSongData data = JSON.parseObject(source.getJSONObject("data").toString(), SingleSongData.class);
+                //学艺不精，fastjson嵌套对象解析不会写，什么鸡掰东西.jpg
+                Best30Model best30Model = new Best30Model(
+                        source.getString("name"),
+                        data,
+                        source.getDouble("ptt"),
+                        source.getDouble("ex_diff")
+                );
+                models.add(best30Model);
+            });
+            api.postMessage(models);
+        }
     }
 }
