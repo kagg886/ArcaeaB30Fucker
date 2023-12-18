@@ -6,7 +6,6 @@ import UserName from "./components/UserName.vue";
 import Best30 from "./components/Best30List.vue";
 import ProgressBar from "./components/ProgressBar.vue";
 import {charList, useCharacter} from "./store/character.ts";
-
 const divide = ref(20)
 const user: Ref<UserProfile> = ref({} as UserProfile)
 
@@ -40,13 +39,14 @@ useNativeAPI('getUserProfile').then((res: UserProfile) => {
   } else {
     ratingType = 0;
   }
-
   rating.value = "http://localhost:61616/arcapi/v1/res/assets?path=img/rating_" + ratingType + ".png"
 }).catch((error: string) => {
   useNativeAPI('rollback', '无法连接到注入到Arcaea的后端服务:' + error)
 })
 
 const character = useCharacter();
+
+
 const openCharDialog = () => {
   character.id = ++character.id % charList.length
 }

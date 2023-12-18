@@ -60,18 +60,16 @@ public class ServiceManager implements WebViewCompat.WebMessageListener {
             return;
         }
         Log.i("JSBridge", "[Server]recv->" + JSON.toJSONString(p));
-        CompletableFuture.runAsync(() -> {
-            receiver.forEach((a) -> a.accept(p, new JSAPI() {
-                @Override
-                public void postMessage(Object reply) {
-                    replyProxy.postMessage(JSON.toJSONString(p.asReply(reply)));
-                }
+        CompletableFuture.runAsync(() -> receiver.forEach((a) -> a.accept(p, new JSAPI() {
+            @Override
+            public void postMessage(Object reply) {
+                replyProxy.postMessage(JSON.toJSONString(p.asReply(reply)));
+            }
 
-                @Override
-                public void postError(String cause) {
-                    replyProxy.postMessage(JSON.toJSONString(p.asError(cause)));
-                }
-            }));
-        });
+            @Override
+            public void postError(String cause) {
+                replyProxy.postMessage(JSON.toJSONString(p.asError(cause)));
+            }
+        })));
     }
 }

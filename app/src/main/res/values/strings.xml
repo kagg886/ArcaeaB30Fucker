@@ -4,11 +4,8 @@
     <string name="title_summary">概述</string>
     <string name="title_b30">Best30</string>
     <string name="title_query">歌曲信息</string>
-    <string name="loading">🤔</string>
     <string name="loading_text" tools:ignore="TypographyEllipsis">Loading...</string>
-    <string name="loading_failed">😭</string>
     <string name="loading_text_failed">Failed</string>
-    <string name="loading_success">🥰</string>
     <string name="loading_text_success">Success</string>
     <string name="ptt_max">13.06</string>
     <string name="best30_status">Best30 Status</string>
@@ -17,4 +14,6 @@
     <string name="setting">设置</string>
     <string name="setting_header_debug">调试设置</string>
     <string name="setting_header_version">本地版本</string>
+    <string name="save">保存到相册</string>
+    <string name="share">分享</string>
 </resources>

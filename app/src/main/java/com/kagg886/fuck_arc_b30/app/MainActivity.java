@@ -45,11 +45,6 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> writeCall;
 
     private String file_path;
-
-    public void navigateTo(@IdRes int id) {
-        navController.navigate(id);
-    }
-
     @SuppressLint("SimpleDateFormat")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home,
                 R.id.navigation_dashboard,
                 R.id.navigation_notifications,
                 R.id.navigation_setting
