@@ -1,4 +1,5 @@
-const API = window.native;
+import {setAPIMockReturn} from "./nativeMock.ts";
+import {Packet} from "./type.ts";
 
 let callbacks: Array<Packet> = []
 
@@ -12,14 +13,20 @@ let callbacks: Array<Packet> = []
 //   })
 // }
 export const init = () => {
+    if (window.native === undefined) {
+        setAPIMockReturn()
+    }
+
+
     window.native.onmessage = (ev: Omit<Packet, 'callSuccess'>) => {
-        ev = JSON.parse(ev.data)
+        let id = ev.id
         try {
             ev.data = JSON.parse(ev.data)
-        } catch (ignored) {}
+        } catch (ignored) {
+        }
         console.log('[Client]recv->', JSON.stringify(ev))
         callbacks = callbacks.filter((value) => {
-            if (value.id === ev.id) {
+            if (value.id === id) {
                 if (value.callError !== undefined && ev.type === 'error') {
                     value.callError(ev.data)
                 } else if (value.callSuccess !== undefined) {
@@ -45,14 +52,7 @@ export const useNativeAPI: (type: string, data?: any) => Promise<any> = (type: s
         packet.callError = reject
     })
     console.log('[Client]send->', JSON.stringify(packet))
-    API.postMessage(JSON.stringify(packet))
+    window.native.postMessage(JSON.stringify(packet))
     return p;
 }
 
-interface Packet {
-    type: string,
-    data: any,
-    id: number,
-    callSuccess?: (data: string) => void
-    callError?: (e: string) => void
-}

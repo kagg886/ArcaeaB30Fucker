@@ -12,6 +12,7 @@ android {
     defaultConfig {
         applicationId "com.kagg886.fuck_arc_b30"
         minSdk 26
+        //noinspection ExpiredTargetSdkVersion
         targetSdk 32
         versionCode 11
         versionName "V1.4.0-pre-1"
@@ -22,7 +23,11 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField('String','HMR','"http://' + ip(0) + ':5173"')
+
+//            buildConfigField('String','HMR','"http://' + ip(0) + ':5173"')
+
+            //test package may be to use
+            buildConfigField('String','HMR','"http://616sb.com"')
         }
         release {
             minifyEnabled false
@@ -53,15 +58,15 @@ def ip(int a) {
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
-    implementation 'androidx.navigation:navigation-fragment:2.7.5'
-    implementation 'androidx.navigation:navigation-ui:2.7.5'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+    implementation 'androidx.navigation:navigation-fragment:2.7.6'
+    implementation 'androidx.navigation:navigation-ui:2.7.6'
     implementation 'androidx.preference:preference:1.2.1'
 
     compileOnly (fileTree(dir: "libs", include: ["*.jar"]))
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.10.0'
+    implementation 'com.google.android.material:material:1.11.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
@@ -69,8 +74,8 @@ dependencies {
 
     implementation 'com.koushikdutta.async:androidasync:2.2.1'
     implementation 'com.alibaba.fastjson2:fastjson2:2.0.42'
-    implementation 'org.jsoup:jsoup:1.15.3'
+    implementation 'org.jsoup:jsoup:1.17.1'
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
-    implementation 'androidx.webkit:webkit:1.8.0'
+    implementation 'androidx.webkit:webkit:1.10.0'
 }

@@ -24,3 +24,11 @@ export interface SingleSongData {
     clearStatus: number
     health: number
 }
+
+export interface Packet {
+    type: string,
+    data: any,
+    id: number,
+    callSuccess?: (data: string) => void
+    callError?: (e: string) => void
+}
