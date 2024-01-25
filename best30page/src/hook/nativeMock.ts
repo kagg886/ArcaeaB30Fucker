@@ -15,6 +15,67 @@ export const setAPIMockReturn = () => {
                 case 'getUserProfile':
                     rtn.data = "{\"name\":\"kagg886\",\"pttB30\":11.707333333333334,\"pttMax\":11.77325,\"pttR10\":11.838000000000001,\"pttReal\":11.74}"
                     break
+                case 'songInfo':
+                    rtn.data = "{\n" +
+                        "        \"idx\": 57,\n" +
+                        "        \"id\": \"dreaminattraction\",\n" +
+                        "        \"title_localized\": {\n" +
+                        "            \"en\": \"Dreamin' Attraction!!\"\n" +
+                        "        },\n" +
+                        "        \"artist\": \"翡乃イスカ\",\n" +
+                        "        \"search_title\": {\n" +
+                        "            \"ja\": [\n" +
+                        "                \"どりーみんあとらくしょん\"\n" +
+                        "            ],\n" +
+                        "            \"ko\": [\n" +
+                        "                \"드리밍 어트랙션\"\n" +
+                        "            ]\n" +
+                        "        },\n" +
+                        "        \"search_artist\": {\n" +
+                        "            \"en\": [\n" +
+                        "                \"hino isuka\"\n" +
+                        "            ],\n" +
+                        "            \"ja\": [\n" +
+                        "                \"ひのいすか\"\n" +
+                        "            ],\n" +
+                        "            \"ko\": [\n" +
+                        "                \"히노 이스카\"\n" +
+                        "            ]\n" +
+                        "        },\n" +
+                        "        \"bpm\": \"205\",\n" +
+                        "        \"bpm_base\": 205,\n" +
+                        "        \"set\": \"base\",\n" +
+                        "        \"purchase\": \"\",\n" +
+                        "        \"audioPreview\": 39804,\n" +
+                        "        \"audioPreviewEnd\": 60878,\n" +
+                        "        \"side\": 0,\n" +
+                        "        \"world_unlock\": true,\n" +
+                        "        \"bg\": \"base_light\",\n" +
+                        "        \"bg_inverse\": \"base_conflict\",\n" +
+                        "        \"date\": 1509667201,\n" +
+                        "        \"version\": \"1.5\",\n" +
+                        "        \"difficulties\": [\n" +
+                        "            {\n" +
+                        "                \"ratingClass\": 0,\n" +
+                        "                \"chartDesigner\": \"Nitro\",\n" +
+                        "                \"jacketDesigner\": \"\",\n" +
+                        "                \"rating\": 4\n" +
+                        "            },\n" +
+                        "            {\n" +
+                        "                \"ratingClass\": 1,\n" +
+                        "                \"chartDesigner\": \"Nitro\",\n" +
+                        "                \"jacketDesigner\": \"\",\n" +
+                        "                \"rating\": 7\n" +
+                        "            },\n" +
+                        "            {\n" +
+                        "                \"ratingClass\": 2,\n" +
+                        "                \"chartDesigner\": \"Nitro\",\n" +
+                        "                \"jacketDesigner\": \"\",\n" +
+                        "                \"rating\": 9\n" +
+                        "            }\n" +
+                        "        ]\n" +
+                        "    }"
+                    break
                 case 'b30':
                     rtn.data = "[\n" +
                         "    {\n" +

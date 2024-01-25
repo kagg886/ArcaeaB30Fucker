@@ -42,6 +42,7 @@ import com.kagg886.fuck_arc_b30.server.model.SingleSongData;
 import com.kagg886.fuck_arc_b30.server.model.UserProfile;
 import com.kagg886.fuck_arc_b30.server.servlet.AbstractServlet;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.Best30;
+import com.kagg886.fuck_arc_b30.server.servlet.impl.GetSongInfoById;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.Profile;
 import com.kagg886.fuck_arc_b30.server.servlet.impl.Version;
 import com.kagg886.fuck_arc_b30.util.IOUtil;
@@ -254,6 +255,26 @@ public class Best30Fragment extends Fragment implements BiConsumer<JSPacket, JSA
                 }
 
             } catch (IOException ignored) {
+            }
+        }
+
+        //TODO 等待真机运行测试
+        if (packet.getType().equals("songInfo")) {
+            String body;
+            try {
+                body = Jsoup.connect(IOUtil.base + GetSongInfoById.INSTANCE.getPath())
+                        .data("id",JSON.parseObject(packet.getData()).getString("id"))
+                        .ignoreContentType(true)
+                        .method(Best30.INSTANCE.getMethod() == AbstractServlet.Method.GET ? Connection.Method.GET : Connection.Method.POST)
+                        .timeout(5000)
+                        .execute().body();
+
+                api.postMessage(JSON.parseObject(body).getJSONObject("data"));
+            } catch (IOException e) {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(requireActivity(), "拉取b30失败，请检查注入到Arcaea的后端是否在线！", Toast.LENGTH_SHORT).show();
+                    requireActivity().finish();
+                });
             }
         }
 

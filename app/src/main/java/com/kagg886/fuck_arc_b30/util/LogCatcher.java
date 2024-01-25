@@ -9,7 +9,7 @@ import java.io.*;
  * @package: com.qlstudio.lite_kagg886.util
  * @className: LogCatcher
  * @author: kagg886
- * @description: TODO
+ * @description: log抓取器
  * @date: 2023/4/24 18:21
  * @version: 1.0
  */
@@ -53,7 +53,7 @@ public class LogCatcher extends Thread {
     public void run() {
         try {
             String s;
-            //TODO Vivo手机for内不加try一直白屏
+            //Vivo手机for内不加try一直白屏
             while ((s = reader.readLine()) != null) {
                 try {
                     writer.write(s);

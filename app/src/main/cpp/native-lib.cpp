@@ -10,7 +10,7 @@ JNIEXPORT jint JNICALL
 Java_xyz_cnyg_memoryreader_NativeMethod_StringIndexOf(JNIEnv *env, jclass clazz,
                                                                 jbyteArray jbr_string,
                                                                 jbyteArray jbr_search) {
-    // TODO: 完成实际的排序算法
+    // 完成实际的排序算法
     // 找不到返回 -1
     // 找到就返回基于块的位置
     // 内置 BM 算法,效率比 Java 快

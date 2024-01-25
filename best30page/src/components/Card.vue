@@ -1,6 +1,8 @@
 <script async setup lang="ts">
-import {Best30Details} from "../hook/type.ts";
+import {Best30Details, SongDetails} from "../hook/type.ts";
 import {computed, inject, ref} from "vue";
+import CustomDialog from "./CustomDialog.vue";
+import {useNativeAPI} from "../hook/nativeAPI.ts";
 
 const props = defineProps<{
   data: Best30Details,
@@ -32,10 +34,49 @@ const getScoreType = computed(() => {
   }
   return 'score_' + scoreType
 })
+
+
+const dialog = ref(false)
+const openDialog = () => {
+  if (songDetails.value.bpm == undefined) {
+    useNativeAPI('songInfo', {
+      id: props.data.data.id
+    }).then((v: SongDetails) => {
+      songDetails.value = v
+
+      const rtn = songDetails.value.difficulties.filter((
+          v: typeof songDetails.value.difficulties[0]
+      ) => {
+        let rNum: number;
+        switch (props.data.data.difficulty) {
+          case "PAST":
+            rNum = 0
+            break
+          case "PRESENT":
+            rNum = 1
+            break
+          case "FUTURE":
+            rNum = 2
+            break
+          case "BEYOND":
+            rNum = 3
+            break
+        }
+        return v.ratingClass === rNum
+      })
+      designer.value = rtn[0].chartDesigner
+    })
+  }
+  dialog.value = true
+}
+
+const songDetails = ref<SongDetails>({} as SongDetails)
+
+const designer = ref()
 </script>
 
 <template>
-  <div class="card">
+  <div @click="openDialog" class="card">
     <div class="name">
       #{{ index + 1 }} {{ data.name.substring(0, Math.min(15, data.name.length)) }}{{
         data.name.length > 15 ? '...' : ''
@@ -79,9 +120,40 @@ const getScoreType = computed(() => {
       </li>
     </ol>
   </div>
+  <CustomDialog v-model:open="dialog">
+    <div class="dialog_header_flex">
+      <img class="dialog_image" :src="bg" alt="">
+      <span>{{ data.name }}</span>
+    </div>
+    <div>详细信息:</div>
+    <ul>
+      <li>发布版本: {{ songDetails.version }}({{ new Date(songDetails.date * 1000).toDateString() }})</li>
+      <li>BPM: {{ songDetails.bpm }}</li>
+      <li>曲师: {{ songDetails.artist }}</li>
+      <li>谱师: {{ designer }}</li>
+    </ul>
+  </CustomDialog>
 </template>
 
 <style scoped>
+.dialog_image {
+  width: 50px;
+  height: 50px;
+}
+
+.dialog_header_flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.dialog_header_flex span {
+  max-width: 50%;
+  margin-left: 20px;
+  font-size: 16px;
+  color: #1f1e33;
+}
+
 
 .center {
   position: absolute;
@@ -153,18 +225,6 @@ li {
   background-repeat: no-repeat;
   background-attachment: scroll;
   background-size: cover;
-}
-
-@keyframes an {
-  from {
-    opacity: 0;
-    transform: translateY(50px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .name {
