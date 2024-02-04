@@ -164,7 +164,9 @@ export const setAPIMockReturn = () => {
                     throw new Error('No Supported cmd:' + obj.type.toString())
             }
             setTimeout(() => {
-                window.native.onmessage?.(rtn)
+                window.native.onmessage?.({
+                    data: JSON.stringify(rtn)
+                })
             },500)
         }
     }

@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONObject;
 import com.kagg886.fuck_arc_b30.server.res.SongManager;
 import com.kagg886.fuck_arc_b30.server.model.Result;
 import com.kagg886.fuck_arc_b30.server.servlet.AbstractServlet;
+import com.koushikdutta.async.http.body.AsyncHttpRequestBody;
+import com.koushikdutta.async.http.body.UrlEncodedFormBody;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 
@@ -25,9 +27,11 @@ public class GetSongInfoById extends AbstractServlet {
     //保证纯净性，此处使用原始数据，详细定数由GetPlayData获取
     @Override
     public void onRequest0(AsyncHttpServerRequest request, AsyncHttpServerResponse response) throws Exception {
-        String id = request.getQuery().getString("id");
+        UrlEncodedFormBody body = ((UrlEncodedFormBody) request.getBody());
+        String id = body.get().getString("id");
         if (id == null) {
             response.send(JSON.toJSONString(Result.ERR_MUST_INPUT_ID));
+            return;
         }
         JSONObject songsResult = SongManager.findSongsById(id);
 

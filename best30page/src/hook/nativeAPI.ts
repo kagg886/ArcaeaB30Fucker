@@ -19,6 +19,7 @@ export const init = () => {
 
 
     window.native.onmessage = (ev: Omit<Packet, 'callSuccess'>) => {
+        ev = JSON.parse(ev["data"])
         let id = ev.id
         try {
             ev.data = JSON.parse(ev.data)

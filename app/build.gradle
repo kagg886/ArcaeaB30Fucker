@@ -24,10 +24,10 @@ android {
     buildTypes {
         debug {
 
-//            buildConfigField('String','HMR','"http://' + ip(0) + ':5173"')
+            buildConfigField('String','HMR','"http://' + ip(0) + ':5173"')
 
             //test package may be to use
-            buildConfigField('String','HMR','"http://616sb.com"')
+//            buildConfigField('String','HMR','"http://616sb.com"')
         }
         release {
             minifyEnabled false
