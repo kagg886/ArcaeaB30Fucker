@@ -84,7 +84,7 @@ const openCharDialog = () => {
 
   display: flex;
   flex-direction: column;
-  background-image: url("http://localhost:61616/arcapi/v1/res/assets?path=img/1080/bg_select_light.png");
+  background-image: url("../assets/img/B30.jpg");
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
