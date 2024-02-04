@@ -1,8 +1,21 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
 
 const open = defineModel('open', {
   default: false
+})
+
+const pageHeadOffset = ref(0)
+const scrollListener = () => {
+  pageHeadOffset.value = document.documentElement.scrollTop;
+}
+
+onMounted(() => {
+  document.addEventListener('scroll',scrollListener)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('scroll',scrollListener);
 })
 
 //Android端不允许使用100vw设置
@@ -31,7 +44,7 @@ const prevent = (e: Event) => {
 .bg {
   position: absolute;
   left: 0;
-  top: 0;
+  top: v-bind(pageHeadOffset + 'px');
   width: 100vw;
   height: v-bind(screenHeight + 'px');
   z-index: 100;
