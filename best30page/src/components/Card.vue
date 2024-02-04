@@ -122,7 +122,7 @@ const designer = ref()
   </div>
   <CustomDialog v-model:open="dialog">
     <div class="dialog_header_flex">
-      <img class="dialog_image" :src="bg" alt="">
+      <img class="dialog_image" :src="`http://localhost:61616/arcapi/v1/res/image?id=${props.data.data.id}&difficulty=${props.data.data.difficulty}`" alt="">
       <span>{{ data.name }}</span>
     </div>
     <div>详细信息:</div>
