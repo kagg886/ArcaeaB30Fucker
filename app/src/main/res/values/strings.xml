@@ -16,4 +16,5 @@
     <string name="setting_header_version">本地版本</string>
     <string name="save">保存到相册</string>
     <string name="share">分享</string>
+    <string name="tutorials">教程</string>
 </resources>

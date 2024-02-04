@@ -72,9 +72,21 @@ public class Best30Fragment extends Fragment implements BiConsumer<JSPacket, JSA
                 menuInflater.inflate(R.menu.fragment_b30_menu, menu);
             }
 
+            @SuppressLint("NonConstantResourceId")
             @Override
             public boolean onMenuItemSelected(@NonNull @NotNull MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
+
+                    case R.id.menu_tutorials -> {
+                        AlertDialog.Builder b = new AlertDialog.Builder(requireActivity());
+                        b.setTitle("新版B30页面使用教程");
+                        b.setMessage("点按rating栏可以显示隐藏rating\n" +
+                                "点按姓名可以隐藏姓名\n" +
+                                "点按B30列表可以查看曲目信息\n" +
+                                "点按右上角菜单可以截图分享\n" +
+                                "愿诸位玩得开心!");
+                        b.show();
+                    }
 
                     case R.id.menu_share -> {
                         Bitmap bitmap = transfer();
@@ -88,16 +100,16 @@ public class Best30Fragment extends Fragment implements BiConsumer<JSPacket, JSA
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
-                        try (FileOutputStream s = new FileOutputStream(f)){
-                            bitmap.compress(Bitmap.CompressFormat.PNG,80,s);
+                        try (FileOutputStream s = new FileOutputStream(f)) {
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 80, s);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
 
-                        var uri = FileProvider.getUriForFile(requireActivity(), requireActivity().getPackageName()+".fileprovider", f);
+                        var uri = FileProvider.getUriForFile(requireActivity(), requireActivity().getPackageName() + ".fileprovider", f);
                         startActivity(new Intent() {{
                             setAction(ACTION_SEND);
-                            putExtra(Intent.EXTRA_STREAM,uri);
+                            putExtra(Intent.EXTRA_STREAM, uri);
                             setType("image/png");
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         }});
@@ -118,7 +130,7 @@ public class Best30Fragment extends Fragment implements BiConsumer<JSPacket, JSA
                         contentValues.put(MediaStore.Images.ImageColumns.HEIGHT, bitmap.getHeight());
                         Uri uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
 
-                        try(OutputStream out = contentResolver.openOutputStream(uri)) {
+                        try (OutputStream out = contentResolver.openOutputStream(uri)) {
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -263,7 +275,7 @@ public class Best30Fragment extends Fragment implements BiConsumer<JSPacket, JSA
             String body;
             try {
                 body = Jsoup.connect(IOUtil.base + GetSongInfoById.INSTANCE.getPath())
-                        .data("id",JSON.parseObject(packet.getData()).getString("id"))
+                        .data("id", JSON.parseObject(packet.getData()).getString("id"))
                         .ignoreContentType(true)
                         .method(Best30.INSTANCE.getMethod() == AbstractServlet.Method.GET ? Connection.Method.GET : Connection.Method.POST)
                         .timeout(5000)
