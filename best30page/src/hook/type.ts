@@ -20,7 +20,7 @@ export type SingleSongData = {
     perfectCount: number
     farCount: number
     lostCount: number
-    difficulty: 'PAST' | 'PRESENT' | 'FUTURE' | 'BEYOND'
+    difficulty: 'PAST' | 'PRESENT' | 'FUTURE' | 'BEYOND' | 'ETERNAL'
     clearStatus: number
     health: number
 }

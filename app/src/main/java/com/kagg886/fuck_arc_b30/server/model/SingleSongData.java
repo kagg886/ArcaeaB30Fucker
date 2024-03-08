@@ -114,7 +114,7 @@ public class SingleSongData {
     }
 
     public enum Difficulty {
-        PAST(0),PRESENT(1),FUTURE(2),BEYOND(3);
+        PAST(0),PRESENT(1),FUTURE(2),BEYOND(3), ETERNAL(4);
         private int diff;
 
         Difficulty(int i) {

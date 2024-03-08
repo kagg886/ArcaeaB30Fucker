@@ -28,6 +28,7 @@ provide('diff_PAST', getAssets("img/multiplayer/ingame-diff-pst.png",true))
 provide('diff_PRESENT', getAssets("img/multiplayer/ingame-diff-prs.png",true))
 provide('diff_FUTURE', getAssets("img/multiplayer/ingame-diff-ftr.png",true))
 provide('diff_BEYOND', getAssets("img/multiplayer/ingame-diff-byd.png",true))
+provide('diff_ETERNAL', getAssets("img/multiplayer/ingame-diff-etr.png",true))
 //
 // case 0 -> "fail";
 // case 1 -> "normal";

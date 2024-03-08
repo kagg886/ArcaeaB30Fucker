@@ -69,6 +69,10 @@ public class Image extends AbstractServlet {
                 difficulty = "3";
             }
 
+            case "ETERNAL" -> {
+                difficulty = "4";
+            }
+
             default -> {
                 //检查是否是数字代号
                 try {
@@ -77,7 +81,7 @@ public class Image extends AbstractServlet {
                         difficulty = "base";
                     }
                 } catch (NumberFormatException e) {
-                    response.send(JSON.toJSONString(Result.ERR_PARAM_IS_ILLEGAL.apply("id", new String[]{"PAST/0", "PRESENT/1", "FUTURE/2", "BEYOND/3"})));
+                    response.send(JSON.toJSONString(Result.ERR_PARAM_IS_ILLEGAL.apply("id", new String[]{"PAST/0", "PRESENT/1", "FUTURE/2", "BEYOND/3","ETERNAL/4"})));
                     return;
                 }
             }
