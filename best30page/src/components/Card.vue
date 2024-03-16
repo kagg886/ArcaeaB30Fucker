@@ -47,7 +47,7 @@ const openDialog = () => {
       const rtn = songDetails.value.difficulties.filter((
           v: typeof songDetails.value.difficulties[0]
       ) => {
-        let rNum: number;
+        let rNum: number = -1;
         switch (props.data.data.difficulty) {
           case "PAST":
             rNum = 0
