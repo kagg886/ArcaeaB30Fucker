@@ -50,6 +50,8 @@ public class Image extends AbstractServlet {
          * PRESENT---1---1
          * FUTURE---2---base
          * BEYOND---3---3
+         * BEYOND---3---3
+         * ETERNAL---4---4
          * */
         String difficulty = Optional.ofNullable(
                 request.getQuery().getString("difficulty")
